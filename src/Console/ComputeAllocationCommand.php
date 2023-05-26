@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace RigStats\Console;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use RigStats\Extraction\SpreadsheetExtractionDataDeserializer;
+use RigStats\Extraction\SpreadsheetExtractionDataDeserializerVioletRed;
 use RigStats\FlatRender\ConsoleFlatRender;
 use RigStats\FlatRender\FlatRender;
 use RigStats\FlatRender\JsonFileFlatRender;
 use RigStats\FlatRender\XlsxFileFlatRender;
-use RigStats\RateAllocation\AllocationComputer;
-use RigStats\RateAllocation\InvalidDataException;
+use RigStats\FlatData\FlattenableErrorsException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,8 +24,6 @@ final class ComputeAllocationCommand extends Command
     protected function configure(): void
     {
         $this
-            // todo: output basename options
-            // todo: output format options (toggles)
             ->addArgument(
                 "inputFilename",
                 InputArgument::REQUIRED,
@@ -45,7 +42,7 @@ final class ComputeAllocationCommand extends Command
         /** @var FlatRender[] $outputRenders */
         $outputRenders = [
             new XlsxFileFlatRender("output/computation", 'allocation'),
-            new JsonFileFlatRender("output/computation", new AllocationJsonDataWrapper),
+            new JsonFileFlatRender("output/computation", new AllocationJsonDataWrapperOrchidGreen),
         ];
         /** @var FlatRender[] $errorRenders */
         $errorRenders = [
@@ -53,16 +50,14 @@ final class ComputeAllocationCommand extends Command
             new ConsoleFlatRender($output),
         ];
         try {
-            $computed = (new AllocationComputer)->compute(
-                (new SpreadsheetExtractionDataDeserializer)->deserialize(IOFactory::load($inputFilename))
-            );
+            $extraction = (new SpreadsheetExtractionDataDeserializerVioletRed)->deserialize(IOFactory::load($inputFilename));
             $output->writeln("Computation complete.");
             foreach ($outputRenders as $outputRender) {
                 $output->writeln($outputRender->disclaimer());
-                $outputRender->renderList($computed);
+                $outputRender->renderList($extraction->toAllocations());
             }
             return Command::SUCCESS;
-        } catch (InvalidDataException $exception) {
+        } catch (FlattenableErrorsException $exception) {
             $output->writeln("Input data contains errors.");
             foreach ($errorRenders as $outputRender) {
                 $output->writeln($outputRender->disclaimer());

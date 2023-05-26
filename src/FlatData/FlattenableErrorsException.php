@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace RigStats\RateAllocation;
+namespace RigStats\FlatData;
 
-use RigStats\FlatData\FlattenableList;
-
-class InvalidDataException extends \RuntimeException
+class FlattenableErrorsException extends \RuntimeException
 {
     public function __construct(public readonly FlattenableList $errors)
     {

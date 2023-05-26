@@ -2,10 +2,13 @@
 
 namespace RigStats\FlatData;
 
+/**
+ * @template T
+ */
 interface FlattenableList
 {
     /**
-     * @return Flattenable[]
+     * @return array<int, T & Flattenable>
      */
     public function all(): array;
 
