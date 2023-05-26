@@ -8,6 +8,7 @@ Setup when using docker compose assuming current working directory in package ro
 1. `cp .env.example .env` and change according to your needs
 2. Run `docker-compose run composer install`
 3. Run samples in `docker-compose run php ./sampleUsage.sh` to verify your setup works
+4. Optionally run tests `docker-compose run php vendor/bin/phpunit tests`
 
 ### Input\Output
 

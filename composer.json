@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Test\\RigStats\\": "src/"
+            "RigStats\\": "src/"
         }
     }
 }
