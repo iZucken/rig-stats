@@ -6,10 +6,16 @@ namespace RigStats\FlatRender;
 
 use RigStats\FlatData\FlattenableList;
 
-final readonly class JsonFileFlatRender implements FlatRender
+final class JsonFileFlatRender implements FlatRender
 {
-    public function __construct(private string $basename, private ?FlatWrapper $wrapper)
+    /**
+     * @var callable
+     */
+    private $wrapper;
+
+    public function __construct(private readonly string $basename, callable $wrapper, private readonly FlatWrapper $remapper)
     {
+        $this->wrapper = $wrapper;
     }
 
     public function disclaimer(): string
@@ -19,9 +25,8 @@ final readonly class JsonFileFlatRender implements FlatRender
 
     public function renderList(FlattenableList $data): void
     {
-        if ($this->wrapper) {
-            $data = $this->wrapper->wrapList($data);
-        }
-        file_put_contents("$this->basename.json", json_encode($data, JSON_PRETTY_PRINT));
+        file_put_contents("$this->basename.json", json_encode(($this->wrapper)(
+            array_map(fn($element) => $element->flatten(), $this->remapper->wrapList($data)->all())
+        ), JSON_PRETTY_PRINT));
     }
 }

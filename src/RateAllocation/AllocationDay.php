@@ -18,6 +18,8 @@ final readonly class AllocationDay implements Flattenable
          */
         public array $rates,
     ) {
+        // todo: maybe not a day...
+        // todo: maybe duplicate rate types
     }
 
     public function flatten(): array

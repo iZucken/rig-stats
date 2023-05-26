@@ -6,5 +6,5 @@ use RigStats\FlatData\FlattenableList;
 
 interface FlatWrapper
 {
-    public function wrapList(FlattenableList $data): array;
+    public function wrapList(FlattenableList $data): FlattenableList;
 }

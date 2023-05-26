@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace RigStats\FlatData;
+namespace RigStats\Extraction;
 
-class FlattenableErrorsException extends \RuntimeException
+use RigStats\FlatData\FlattenableList;
+
+final class ExtractionDataCorruptionException extends \RuntimeException
 {
     public function __construct(public readonly FlattenableList $errors)
     {

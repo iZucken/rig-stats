@@ -40,13 +40,12 @@ class SpreadsheetExtractionDataDeserializerVioletRed
                 ],
             ];
         }
-        $data = new ExtractionDaySeries;
+        $data = [];
         foreach ($merge as $date => $wells) {
             foreach ($wells as $wellId => $well) {
                 $wellId = new WellId(intval($wellId));
-                $data->push(new ExtractionDay(
+                $data[] = (new ExtractionDay(
                     \DateTimeImmutable::createFromFormat("Y-m-d", $date),
-                    $wellId,
                     $well['rates'],
                     array_map(fn (array $layer) => new ExtractionLayer(
                         new LayerId($wellId, intval($layer['layer'])),
@@ -55,6 +54,6 @@ class SpreadsheetExtractionDataDeserializerVioletRed
                 ));
             }
         }
-        return $data;
+        return new ExtractionDaySeries($data);
     }
 }

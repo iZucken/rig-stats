@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace RigStats\Extraction;
 
 use RigStats\Fluids\FluidRate;
-use RigStats\Rig\WellId;
+use RigStats\Fluids\FluidSplit;
+use RigStats\Fluids\FluidType;
+use RigStats\RateAllocation\AllocationDay;
 
 final readonly class ExtractionDay
 {
     public function __construct(
         public \DateTimeInterface $day,
-        public WellId $well,
         /**
          * @var FluidRate[]
          */
@@ -21,5 +22,49 @@ final readonly class ExtractionDay
          */
         public array $layers,
     ) {
+        // todo: maybe not a day...
+        // todo: maybe duplicate rate types
+        // todo: maybe invalid type intersection
+    }
+
+    public function validate(): ?InvalidDayRates
+    {
+        $sums = array_reduce($this->rates, fn (array $sums, FluidRate $rate) => [$rate->type->value => 0.0, ...$sums], []);
+        foreach ($this->layers as $layerData) {
+            foreach ($layerData->splits as $split) {
+                $sums[$split->type->value] += $split->value;
+            }
+        }
+        foreach ($sums as $fluid => $sum) {
+            $error = $sum - 100;
+            if (abs($error) > FluidSplit::EPSILON) {
+                return new InvalidDayRates(
+                    $this->day,
+                    $this->layers[0]->layer->well,
+                    FluidType::from($fluid),
+                    sprintf("Split data sum error by %.2f%%", $error),
+                );
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return AllocationDay[]
+     */
+    public function toAllocationDays(): array
+    {
+        $days = [];
+        foreach ($this->layers as $layer) {
+            $relativeRates = [];
+            foreach ($layer->splits as $split) {
+                $relatedRate = array_values(
+                    array_filter($this->rates, fn($rate) => $rate->type === $split->type)
+                )[0];
+                $relativeRates[] = new FluidRate($split->type, $relatedRate->value * $split->value / 100.0);
+            }
+            $days[] = new AllocationDay($this->day, $layer->layer, $relativeRates);
+        }
+        return $days;
     }
 }

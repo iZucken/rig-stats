@@ -16,5 +16,6 @@ final readonly class ExtractionLayer
          */
         public array $splits,
     ) {
+        // todo: maybe duplicate split types
     }
 }

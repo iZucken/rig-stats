@@ -10,7 +10,7 @@ use RigStats\FlatRender\ConsoleFlatRender;
 use RigStats\FlatRender\FlatRender;
 use RigStats\FlatRender\JsonFileFlatRender;
 use RigStats\FlatRender\XlsxFileFlatRender;
-use RigStats\FlatData\FlattenableErrorsException;
+use RigStats\Extraction\ExtractionDataCorruptionException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,6 +24,7 @@ final class ComputeAllocationCommand extends Command
     protected function configure(): void
     {
         $this
+            // todo: options to set output file
             ->addArgument(
                 "inputFilename",
                 InputArgument::REQUIRED,
@@ -40,9 +41,12 @@ final class ComputeAllocationCommand extends Command
             return Command::INVALID;
         }
         /** @var FlatRender[] $outputRenders */
+        // todo: options to toggle output types
         $outputRenders = [
             new XlsxFileFlatRender("output/computation", 'allocation'),
-            new JsonFileFlatRender("output/computation", new AllocationJsonDataWrapperOrchidGreen),
+            new JsonFileFlatRender("output/computation", fn($data) => [
+                'allocation' => ['data' => $data]
+            ], new AllocationRemapperOrchidGreen),
         ];
         /** @var FlatRender[] $errorRenders */
         $errorRenders = [
@@ -50,14 +54,16 @@ final class ComputeAllocationCommand extends Command
             new ConsoleFlatRender($output),
         ];
         try {
-            $extraction = (new SpreadsheetExtractionDataDeserializerVioletRed)->deserialize(IOFactory::load($inputFilename));
+            $computed = (new SpreadsheetExtractionDataDeserializerVioletRed)->deserialize(
+                IOFactory::load($inputFilename)
+            )->toAllocations();
             $output->writeln("Computation complete.");
             foreach ($outputRenders as $outputRender) {
                 $output->writeln($outputRender->disclaimer());
-                $outputRender->renderList($extraction->toAllocations());
+                $outputRender->renderList($computed);
             }
             return Command::SUCCESS;
-        } catch (FlattenableErrorsException $exception) {
+        } catch (ExtractionDataCorruptionException $exception) {
             $output->writeln("Input data contains errors.");
             foreach ($errorRenders as $outputRender) {
                 $output->writeln($outputRender->disclaimer());

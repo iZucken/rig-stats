@@ -5,75 +5,27 @@ declare(strict_types=1);
 namespace RigStats\Extraction;
 
 use RigStats\FlatData\ArrayFlattenableList;
-use RigStats\FlatData\FlattenableList;
-use RigStats\Fluids\FluidRate;
-use RigStats\Fluids\FluidSplit;
-use RigStats\Fluids\FluidType;
-use RigStats\RateAllocation\AllocationDay;
-use RigStats\FlatData\FlattenableErrorsException;
+use RigStats\RateAllocation\AllocationDaySeries;
 
-class ExtractionDaySeries
+final class ExtractionDaySeries
 {
     /**
-     * @var ExtractionDay[]
+     * @var ExtractionDay[] $list
      */
-    private array $list = [];
-
-    public function push(ExtractionDay $data): void
+    public function __construct(private readonly array $list)
     {
-        $this->list[] = $data;
+        // todo: maybe invalid day sequence
+        // todo: maybe inconsistent types per day
     }
 
-    public function validateSeries(): FlattenableList
+    public function toAllocations(): AllocationDaySeries
     {
-        $errors = [];
-        foreach ($this->list as $record) {
-            $sums = [];
-            foreach ($record->layers as $layerData) {
-                foreach ($layerData->splits as $split) {
-                    if (!isset($sums[$split->type->value])) {
-                        $sums[$split->type->value] = 0.0;
-                    }
-                    $sums[$split->type->value] += $split->value;
-                }
-            }
-            foreach ($sums as $fluid => $sum) {
-                $error = $sum - 100;
-                if (abs($error) > FluidSplit::EPSILON) {
-                    $errors[] = new InvalidDayRates(
-                        $record->day,
-                        $record->well,
-                        FluidType::from($fluid),
-                        sprintf("Split data sum error by %.2f%%", $error),
-                    );
-                }
-            }
+        $errors = array_filter(array_map(fn($record) => $record->validate(), $this->list));
+        if (count($errors)) {
+            throw new ExtractionDataCorruptionException(new ArrayFlattenableList($errors));
         }
-        return new ArrayFlattenableList($errors);
-    }
-
-    /**
-     * @return ArrayFlattenableList<AllocationDay>
-     */
-    public function toAllocations(): ArrayFlattenableList
-    {
-        $errors = $this->validateSeries();
-        if ($errors->count()) {
-            throw new FlattenableErrorsException($errors);
-        }
-        $computed = [];
-        foreach ($this->list as $record) {
-            foreach ($record->layers as $layer) {
-                $relativeRates = [];
-                foreach ($layer->splits as $split) {
-                    $relatedRate = array_values(
-                        array_filter($record->rates, fn($rate) => $rate->type === $split->type)
-                    )[0];
-                    $relativeRates[] = new FluidRate($split->type, $relatedRate->value * $split->value / 100.0);
-                }
-                $computed[] = new AllocationDay($record->day, $layer->layer, $relativeRates);
-            }
-        }
-        return new ArrayFlattenableList($computed);
+        return new AllocationDaySeries(
+            array_merge(...array_map(fn($record) => $record->toAllocationDays(), $this->list))
+        );
     }
 }

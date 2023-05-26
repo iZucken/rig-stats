@@ -23,9 +23,4 @@ final readonly class ArrayFlattenableList implements FlattenableList
     {
         return $this->content;
     }
-
-    public function count(): int
-    {
-        return count($this->content);
-    }
 }
