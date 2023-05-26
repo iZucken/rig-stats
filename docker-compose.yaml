@@ -1,0 +1,18 @@
+version: "3.1"
+services:
+  php:
+    build: docker/php
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
+    working_dir: /var/app/
+    volumes:
+      - ./:/var/app/
+  composer:
+    image: composer
+    env_file:
+      - .env
+    user: "${UID}:${GID}"
+    working_dir: /var/app/
+    volumes:
+      - ./:/var/app/
