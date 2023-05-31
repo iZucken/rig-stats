@@ -15,7 +15,7 @@ Setup when using docker compose assuming current working directory in package ro
 You may pass input files using command arguments e.g. `./rigstats.php compute:allocation $filename`.
 Output files are saved in `$(cwd)/output/*` with appropriate suffixes.
 Results by default are written to console if and as appropriate.
-See input examples in `examples/` dir.
+See input examples in `tests/examples/*`.
 
 ### Validation
 

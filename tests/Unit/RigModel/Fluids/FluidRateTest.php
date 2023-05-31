@@ -1,6 +1,6 @@
 <?php
 
-namespace Unit\Fluids;
+namespace Unit\RigModel\Fluids;
 
 use PHPUnit\Framework\TestCase;
 use RigStats\RigModel\Fluids\FluidRate;
