@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use RigStats\RigModel\Extraction\ExtractionDay;
-use RigStats\RigModel\Extraction\ExtractionDaySeries as ExtractionDaySeriesData;
+use RigStats\RigModel\Extraction\ExtractionDays as ExtractionDaysModel;
 use RigStats\RigModel\Extraction\ExtractionLayer;
 use RigStats\RigModel\Fluids\FluidRate;
 use RigStats\RigModel\Fluids\FluidSplit;
@@ -17,11 +17,11 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
 /**
- * @template-extends Deserializer<PhpSpreadsheet, ExtractionDaySeriesData>
+ * @template-extends Deserializer<PhpSpreadsheet, ExtractionDaysModel>
  */
-final readonly class ExtractionDaySeries implements Deserializer
+final readonly class ExtractionDays implements Deserializer
 {
-    public function __construct(private PhpSpreadsheet $carrier, private Type $type)
+    public function __construct(private PhpSpreadsheet $carrier, private Type $type, private float $epsilon)
     {
     }
 
@@ -35,7 +35,7 @@ final readonly class ExtractionDaySeries implements Deserializer
         return $this->type;
     }
 
-    public function deserialize(): ExtractionDaySeriesData
+    public function deserialize(): ExtractionDaysModel
     {
         $rates = $this->carrier->getData()->getSheetByName("rates")->toArray();
         $splits = $this->carrier->getData()->getSheetByName("splits")->toArray();
@@ -73,9 +73,10 @@ final readonly class ExtractionDaySeries implements Deserializer
                         new LayerId($wellId, intval($layer['layer'])),
                         $layer['splits'],
                     ), $well['layers']),
+                    $this->epsilon,
                 ));
             }
         }
-        return new ExtractionDaySeriesData($data);
+        return new ExtractionDaysModel($data);
     }
 }

@@ -9,8 +9,6 @@ final readonly class FluidSplit
     public FluidType $type;
     public float $value;
 
-    public const EPSILON = 1e-5;
-
     public function __construct(FluidType $type, float $value)
     {
         if ($value < 0.0 || $value > 100.0) {

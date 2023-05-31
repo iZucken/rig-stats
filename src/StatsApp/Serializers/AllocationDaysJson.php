@@ -6,13 +6,13 @@ namespace RigStats\StatsApp\Serializers;
 
 use RigStats\RigModel\Fluids\FluidRate;
 use RigStats\RigModel\RateAllocation\AllocationDay;
-use RigStats\RigModel\RateAllocation\AllocationDaySeries;
+use RigStats\RigModel\RateAllocation\AllocationDays;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class AllocationSeriesJson implements Serializer
+final readonly class AllocationDaysJson implements Serializer
 {
-    public function __construct(private AllocationDaySeries $data)
+    public function __construct(private AllocationDays $data)
     {
     }
 
@@ -35,7 +35,7 @@ final readonly class AllocationSeriesJson implements Serializer
                         ],
                         []
                     )
-                ), $this->data->all())
+                ), $this->data->days)
             ]
         ]);
     }

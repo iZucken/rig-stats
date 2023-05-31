@@ -6,13 +6,13 @@ namespace RigStats\StatsApp\Serializers;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use RigStats\RigModel\Fluids\FluidRate;
-use RigStats\RigModel\RateAllocation\AllocationDaySeries;
+use RigStats\RigModel\RateAllocation\AllocationDays;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class AllocationSeriesSpreadsheet implements Serializer
+final readonly class AllocationDaysSpreadsheet implements Serializer
 {
-    public function __construct(private AllocationDaySeries $data)
+    public function __construct(private AllocationDays $data)
     {
     }
 
@@ -34,7 +34,7 @@ final readonly class AllocationSeriesSpreadsheet implements Serializer
         ) {
             $sheet->setCellValue([$index + 1, 1], $key);
         }
-        foreach ($this->data->all() as $rowIndex => $row) {
+        foreach ($this->data->days as $rowIndex => $row) {
             $serialRow = array_merge(
                 [
                     $row->day->format("Y-m-d H:i:s"),

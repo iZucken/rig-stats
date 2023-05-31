@@ -13,8 +13,8 @@ use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWrite
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\Types\TypeDescriber;
-use RigStats\RigModel\Extraction\ExtractionDaySeries;
-use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
+use RigStats\RigModel\Extraction\ExtractionDays;
+use RigStats\RigModel\Extraction\WellFluidDayErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
 use Symfony\Component\Console\Command\Command;
@@ -62,7 +62,7 @@ final class ComputeAllocationCommand extends Command
     {
         // todo: ideally do something about this global state, maybe push it into serializer context
         ini_set('serialize_precision', 14);
-        $sourceType = new ClassType(ExtractionDaySeries::class);
+        $sourceType = new ClassType(ExtractionDays::class);
         $inputFilename = $input->getArgument("inputFilename");
         if (!(is_file($inputFilename) && is_readable($inputFilename))) {
             $output->writeln("Cannot read from $inputFilename.");
@@ -92,24 +92,18 @@ final class ComputeAllocationCommand extends Command
             return Command::INVALID;
         }
         $loadedModel = $deserializer->deserialize();
-        if (!($loadedModel instanceof ExtractionDaySeries)) {
+        if (!($loadedModel instanceof ExtractionDays)) {
             // todo: test when other data type is possible
             $output->writeln(
-                "This program only supports " . ExtractionDaySeries::class
+                "This program only supports " . ExtractionDays::class
                 . ", but got " . TypeDescriber::describe($loadedModel)
             );
             return Command::INVALID;
         }
-        try {
-            $compute = $loadedModel->toAllocations();
-            $output->writeln("Computation complete.");
-            $this->writeAll($compute, $output, $writers);
-            return Command::SUCCESS;
-        } catch (ExtractionDataCorruptionException $exception) {
-            $output->writeln("Input data contains errors.");
-            $this->writeAll($exception, $output, $writers);
-            return Command::INVALID;
-        }
+        $computed = $loadedModel->intoAllocationDaysOrInvalidRates();
+        $output->writeln("Computation complete into " . TypeDescriber::describe($computed));
+        $this->writeAll($computed, $output, $writers);
+        return Command::SUCCESS;
     }
 
     /**

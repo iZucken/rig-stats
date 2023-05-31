@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
+use RigStats\RigModel\Extraction\WellFluidDayErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class InvalidDayRatesSpreadsheet implements Serializer
+final readonly class WellFluidDayErrorsSpreadsheet implements Serializer
 {
-    public function __construct(private ExtractionDataCorruptionException $error)
+    public function __construct(private WellFluidDayErrors $error)
     {
     }
 

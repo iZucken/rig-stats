@@ -6,10 +6,12 @@ use PhpOffice\PhpSpreadsheet\Settings;
 use PHPUnit\Framework\TestCase;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactoryCollection;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactoryCollection;
+use RigStats\RigModel\Extraction\WellFluidDayErrors;
+use RigStats\RigModel\RateAllocation\AllocationDays;
 use RigStats\StatsApp\Console\ComputeAllocationCommand;
-use RigStats\StatsApp\Serializers\AllocationSeriesFactory;
-use RigStats\StatsApp\Serializers\ExtractionDaySeriesFactory;
-use RigStats\StatsApp\Serializers\InvalidDayRatesMultiFactory;
+use RigStats\StatsApp\Serializers\AllocationDaysFactory;
+use RigStats\StatsApp\Serializers\ExtractionDaysFactory;
+use RigStats\StatsApp\Serializers\WellFluidDayErrorsFactory;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -24,11 +26,11 @@ class ComputeAllocationCommandTest extends TestCase
         $this->sut = new CommandTester(
             new ComputeAllocationCommand(
                 new SerializerFactoryCollection([
-                    new AllocationSeriesFactory(),
-                    new InvalidDayRatesMultiFactory(),
+                    new AllocationDaysFactory(),
+                    new WellFluidDayErrorsFactory(),
                 ]),
                 new DeserializerFactoryCollection([
-                    new ExtractionDaySeriesFactory(),
+                    new ExtractionDaysFactory(1e-5),
                 ]),
             )
         );
@@ -58,13 +60,14 @@ class ComputeAllocationCommandTest extends TestCase
         $this->assertEquals("php-spreadsheet (rates) is not deserializable into any known type.\n", $this->sut->getDisplay());
     }
 
-    public function testItFailsOnInvalidData()
+    public function testItRunsOnInvalidWellStructuredData()
     {
         $this->sut->execute([
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/invalid_lite.xlsx',
         ]);
-        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
-        $this->assertStringContainsString("Input data contains errors.", $this->sut->getDisplay());
+        $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
+        $this->assertStringContainsString(WellFluidDayErrors::class, $this->sut->getDisplay());
     }
 
     public function testItFailsOnInvalidWriterOptions()
@@ -87,7 +90,8 @@ class ComputeAllocationCommandTest extends TestCase
             '--writer' => ['stdio'],
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
-        $this->assertStringContainsString("Computation complete.\n", $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
+        $this->assertStringContainsString(AllocationDays::class, $this->sut->getDisplay());
         $this->assertStringContainsString("No compatible output for", $this->sut->getDisplay());
     }
 
@@ -97,7 +101,8 @@ class ComputeAllocationCommandTest extends TestCase
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
-        $this->assertEquals("Computation complete.\n", $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
+        $this->assertStringContainsString(AllocationDays::class, $this->sut->getDisplay());
     }
 
     public function testItRunsOnValidDataWithCustomPath()
@@ -109,7 +114,8 @@ class ComputeAllocationCommandTest extends TestCase
             '--writer' => ['xlsx'],
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
-        $this->assertStringContainsString("Computation complete.\n", $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
+        $this->assertStringContainsString(AllocationDays::class, $this->sut->getDisplay());
         $this->assertFileExists($tmpName . '.xlsx');
         unlink($tmpName . '.xlsx');
     }

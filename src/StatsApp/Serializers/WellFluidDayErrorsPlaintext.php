@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace RigStats\StatsApp\Serializers;
 
-use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
+use RigStats\RigModel\Extraction\WellFluidDayErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class InvalidDayRatesPlaintext implements Serializer
+final readonly class WellFluidDayErrorsPlaintext implements Serializer
 {
-    public function __construct(private ExtractionDataCorruptionException $error)
+    public function __construct(private WellFluidDayErrors $error)
     {
     }
 

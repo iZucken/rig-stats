@@ -8,18 +8,18 @@ use RigStats\Infrastructure\SerializationFramework\Format;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
-use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
+use RigStats\RigModel\Extraction\WellFluidDayErrors;
 
-final readonly class InvalidDayRatesMultiFactory implements SerializerFactory
+final readonly class WellFluidDayErrorsFactory implements SerializerFactory
 {
-    public function serializable(mixed $data, Format $format): null|InvalidDayRatesPlaintext|InvalidDayRatesSpreadsheet
+    public function serializable(mixed $data, Format $format): null|WellFluidDayErrorsPlaintext|WellFluidDayErrorsSpreadsheet
     {
-        if ($data instanceof ExtractionDataCorruptionException) {
+        if ($data instanceof WellFluidDayErrors) {
             if ($format->equals(Plaintext::getFormat())) {
-                return new InvalidDayRatesPlaintext($data);
+                return new WellFluidDayErrorsPlaintext($data);
             }
             if ($format->equals(PhpSpreadsheet::getFormat())) {
-                return new InvalidDayRatesSpreadsheet($data);
+                return new WellFluidDayErrorsSpreadsheet($data);
             }
         }
         return null;

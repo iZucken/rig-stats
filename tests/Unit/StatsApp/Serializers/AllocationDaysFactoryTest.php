@@ -3,31 +3,31 @@
 namespace Unit\StatsApp\Serializers;
 
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
-use RigStats\StatsApp\Serializers\AllocationSeriesJson;
-use RigStats\StatsApp\Serializers\AllocationSeriesFactory;
+use RigStats\StatsApp\Serializers\AllocationDaysJson;
+use RigStats\StatsApp\Serializers\AllocationDaysFactory;
 use PHPUnit\Framework\TestCase;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
-use RigStats\RigModel\RateAllocation\AllocationDaySeries;
-use RigStats\StatsApp\Serializers\AllocationSeriesSpreadsheet;
+use RigStats\RigModel\RateAllocation\AllocationDays;
+use RigStats\StatsApp\Serializers\AllocationDaysSpreadsheet;
 
 /**
- * @covers \RigStats\StatsApp\Serializers\AllocationSeriesFactory
+ * @covers \RigStats\StatsApp\Serializers\AllocationDaysFactory
  */
-class AllocationSeriesFactoryTest extends TestCase
+class AllocationDaysFactoryTest extends TestCase
 {
     public function testSerializable()
     {
-        $probe = new AllocationSeriesFactory();
-        $maybeValidData = new AllocationDaySeries([]);
+        $probe = new AllocationDaysFactory();
+        $maybeValidData = new AllocationDays([]);
         $this->assertNull($probe->serializable(null, Json::getFormat()));
         $this->assertNull($probe->serializable($maybeValidData, Plaintext::getFormat()));
         $this->assertInstanceOf(
-            AllocationSeriesJson::class,
+            AllocationDaysJson::class,
             $probe->serializable($maybeValidData, Json::getFormat())
         );
         $this->assertInstanceOf(
-            AllocationSeriesSpreadsheet::class,
+            AllocationDaysSpreadsheet::class,
             $probe->serializable($maybeValidData, PhpSpreadsheet::getFormat())
         );
     }

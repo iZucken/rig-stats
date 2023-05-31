@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace RigStats\RigModel\Extraction;
 
-use RigStats\RigModel\RateAllocation\AllocationDaySeries;
+use RigStats\RigModel\RateAllocation\AllocationDays;
 
-final readonly class ExtractionDaySeries
+final readonly class ExtractionDays
 {
     /**
      * @var ExtractionDay[] $list
@@ -17,13 +17,16 @@ final readonly class ExtractionDaySeries
         // todo: maybe inconsistent types per day
     }
 
-    public function toAllocations(): AllocationDaySeries
+    /**
+     * @throws WellFluidDayErrors
+     */
+    public function intoAllocationDaysOrInvalidRates(): WellFluidDayErrors|AllocationDays
     {
-        $errors = array_filter(array_map(fn($record) => $record->validate(), $this->list));
+        $errors = array_values(array_merge(...array_map(fn($record) => $record->getInvalidRates(), $this->list)));
         if (count($errors)) {
-            throw new ExtractionDataCorruptionException($errors);
+            return new WellFluidDayErrors($errors);
         }
-        return new AllocationDaySeries(
+        return new AllocationDays(
             array_values(array_merge(...array_map(fn($record) => $record->toAllocationDays(), $this->list)))
         );
     }

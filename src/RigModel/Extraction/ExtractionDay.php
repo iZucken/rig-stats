@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace RigStats\RigModel\Extraction;
 
 use RigStats\RigModel\Fluids\FluidRate;
-use RigStats\RigModel\Fluids\FluidSplit;
 use RigStats\RigModel\Fluids\FluidType;
 use RigStats\RigModel\RateAllocation\AllocationDay;
 
@@ -21,24 +20,33 @@ final readonly class ExtractionDay
          * @var ExtractionLayer[]
          */
         public array $layers,
+        public float $epsilon,
     ) {
         // todo: maybe not a day...
         // todo: maybe duplicate rate types
         // todo: maybe invalid type intersection
     }
 
-    public function validate(): ?InvalidDayRates
+    /**
+     * @return WellFluidDayError[]
+     */
+    public function getInvalidRates(): array
     {
-        $sums = array_reduce($this->rates, fn (array $sums, FluidRate $rate) => [$rate->type->value => 0.0, ...$sums], []);
+        $sums = array_reduce(
+            $this->rates,
+            fn(array $sums, FluidRate $rate) => [$rate->type->value => 0.0, ...$sums],
+            [],
+        );
         foreach ($this->layers as $layerData) {
             foreach ($layerData->splits as $split) {
                 $sums[$split->type->value] += $split->value;
             }
         }
+        $errors = [];
         foreach ($sums as $fluid => $sum) {
             $error = $sum - 100;
-            if (abs($error) > FluidSplit::EPSILON) {
-                return new InvalidDayRates(
+            if (abs($error) > $this->epsilon) {
+                $errors[] = new WellFluidDayError(
                     $this->day,
                     $this->layers[0]->layer->well,
                     FluidType::from($fluid),
@@ -46,7 +54,7 @@ final readonly class ExtractionDay
                 );
             }
         }
-        return null;
+        return $errors;
     }
 
     /**
