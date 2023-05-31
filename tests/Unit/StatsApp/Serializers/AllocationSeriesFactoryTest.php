@@ -12,7 +12,7 @@ use RigStats\RigModel\RateAllocation\AllocationDaySeries;
 use RigStats\StatsApp\Serializers\AllocationSeriesSpreadsheet;
 
 /**
- * @covers AllocationSeriesFactory
+ * @covers \RigStats\StatsApp\Serializers\AllocationSeriesFactory
  */
 class AllocationSeriesFactoryTest extends TestCase
 {
