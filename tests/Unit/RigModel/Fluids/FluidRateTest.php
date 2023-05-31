@@ -11,7 +11,7 @@ use RigStats\RigModel\Fluids\FluidType;
  */
 class FluidRateTest extends TestCase
 {
-    function testVo()
+    function testInstance()
     {
         $valid = new FluidRate(FluidType::Oil, 100.0);
         $this->assertEquals('oil', $valid->type->value);

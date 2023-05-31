@@ -17,9 +17,10 @@ final class AllocationSeriesMultiProbe implements SerializerProbe
         if ($data instanceof AllocationDaySeries) {
             if ($format->equals(Json::getFormat())) {
                 return new AllocationSeriesJson($data);
-            }
-            if ($format->equals(PhpSpreadsheet::getFormat())) {
+            } elseif ($format->equals(PhpSpreadsheet::getFormat())) {
                 return new AllocationSeriesSpreadsheet($data);
+            } else {
+                return null;
             }
         }
         return null;

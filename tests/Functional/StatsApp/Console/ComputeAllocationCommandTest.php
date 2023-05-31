@@ -11,19 +11,38 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class ComputeAllocationCommandTest extends TestCase
 {
+    private CommandTester $sut;
+
+    protected function setUp(): void
+    {
+        $this->sut = new CommandTester(new ComputeAllocationCommand);
+    }
+
+    public function testItFailsOnInvalidFile() {
+        $this->sut->execute([
+            'inputFilename' => 'foobar',
+        ]);
+        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
+    }
+
+    public function testItFailsOnUnknownSpreadsheetType() {
+        $this->sut->execute([
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/unknownSpreadsheet.xlsx',
+        ]);
+        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
+    }
+
     public function testItFailsOnInvalidData() {
-        $tester = new CommandTester(new ComputeAllocationCommand);
-        $tester->execute([
+        $this->sut->execute([
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/invalid.xlsx',
         ]);
-        $this->assertEquals(2, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
     }
 
     public function testItRunsOnValidData() {
-        $tester = new CommandTester(new ComputeAllocationCommand);
-        $tester->execute([
+        $this->sut->execute([
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid.xlsx',
         ]);
-        $this->assertEquals(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
     }
 }

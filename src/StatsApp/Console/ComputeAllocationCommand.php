@@ -73,6 +73,7 @@ final class ComputeAllocationCommand extends Command
         }
         $loadedModel = $deserializer->deserialize();
         if (!($loadedModel instanceof ExtractionDaySeries)) {
+            // todo: test when other data type is possible
             $output->writeln("This program only supports " . ExtractionDaySeries::class . ", but got " . gettype($loadedModel));
             return Command::INVALID;
         }
