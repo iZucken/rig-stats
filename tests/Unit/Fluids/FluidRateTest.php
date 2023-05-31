@@ -3,11 +3,11 @@
 namespace Unit\Fluids;
 
 use PHPUnit\Framework\TestCase;
-use RigStats\Fluids\FluidRate;
-use RigStats\Fluids\FluidType;
+use RigStats\RigModel\Fluids\FluidRate;
+use RigStats\RigModel\Fluids\FluidType;
 
 /**
- * @covers \RigStats\Fluids\FluidRate
+ * @covers \RigStats\RigModel\Fluids\FluidRate
  */
 class FluidRateTest extends TestCase
 {

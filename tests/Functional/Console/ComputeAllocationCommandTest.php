@@ -3,11 +3,11 @@
 namespace Functional\Console;
 
 use PHPUnit\Framework\TestCase;
-use RigStats\Console\ComputeAllocationCommand;
+use RigStats\StatsApp\Console\ComputeAllocationCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @covers \RigStats\Console\ComputeAllocationCommand
+ * @covers \RigStats\StatsApp\Console\ComputeAllocationCommand
  */
 class ComputeAllocationCommandTest extends TestCase
 {

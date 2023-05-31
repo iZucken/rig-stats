@@ -27,18 +27,19 @@ Invalid inputs are likely to fail.
 Sample error data for allocation computation when using console output:
 ```text
 Input data contains errors.
-Writing to console
-dt; well_id; fluid; error
-2022-12-01 16:38:22; 92; oil; Split data sum error by -41.61%
-2022-12-01 16:38:22; 154; gas; Split data sum error by -15.15%
-2022-12-01 16:38:22; 188; oil; Split data sum error by 24.91%
-2022-12-02 16:38:22; 132; oil; Split data sum error by 31.28%
+Writing plain text (892 bytes) to generic output
+At 2022-12-01 #92 for oil: Split data sum error by -41.61%
+At 2022-12-01 #154 for gas: Split data sum error by -15.15%
+At 2022-12-01 #188 for oil: Split data sum error by 24.91%
+At 2022-12-02 #132 for oil: Split data sum error by 31.28%
+At 2022-12-03 #132 for gas: Split data sum error by 43.59%
 ```
 
 Sample error data for allocation computation when using xlsx output:
-| dt         | well_id | fluid | error                                |
-|------------|---------|-------|--------------------------------------|
-| 2022-12-01 | 1       | oil   | Layer split data error -0.5% for oil |
+
+| dt         | well_id | fluid | error                           |
+|------------|---------|-------|---------------------------------|
+| 2022-12-01 | 1       | oil   | Split data sum error by -41.61% |
 
 ### Computation
 
