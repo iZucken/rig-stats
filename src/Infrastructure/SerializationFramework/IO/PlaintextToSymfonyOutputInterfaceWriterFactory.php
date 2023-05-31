@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace RigStats\Infrastructure\SerializationFramework\IO;
 
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriter;
-use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterProbe;
+use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @template-extends SerializedWriterProbe<Plaintext>
+ * @template-extends SerializedWriterFactory<Plaintext>
  */
-final readonly class PlaintextToSymfonyOutputInterfaceWriterProbe implements SerializedWriterProbe
+final readonly class PlaintextToSymfonyOutputInterfaceWriterFactory implements SerializedWriterFactory
 {
     public function __construct(private OutputInterface $output)
     {

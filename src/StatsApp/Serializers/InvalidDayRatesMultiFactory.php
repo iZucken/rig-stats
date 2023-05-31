@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use RigStats\Infrastructure\SerializationFramework\Format;
-use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerProbe;
+use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
 use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
 
-final readonly class InvalidDayRatesMultiProbe implements SerializerProbe
+final readonly class InvalidDayRatesMultiFactory implements SerializerFactory
 {
     public function serializable(mixed $data, Format $format): null|InvalidDayRatesPlaintext|InvalidDayRatesSpreadsheet
     {

@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use RigStats\RigModel\Extraction\ExtractionDaySeries as ExtractionDaySeriesModel;
-use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerProbe;
+use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
 use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
 /**
- * @template-extends DeserializerProbe<PhpSpreadsheet, ExtractionDaySeriesModel>
+ * @template-extends DeserializerFactory<PhpSpreadsheet, ExtractionDaySeriesModel>
  */
-final class ExtractionDaySeriesProbe implements DeserializerProbe
+final class ExtractionDaySeriesFactory implements DeserializerFactory
 {
     public function deserializable(Serialized $data, Type $type): ?ExtractionDaySeries
     {

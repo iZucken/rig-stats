@@ -10,7 +10,7 @@ use RigStats\Infrastructure\SerializationFramework\Format;
  * @template Target
  * @template Carrier
  */
-interface SerializerProbe
+interface SerializerFactory
 {
     /**
      * @param Target $data

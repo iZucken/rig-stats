@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace RigStats\Infrastructure\SerializationFramework\IO;
 
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriter;
-use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterProbe;
+use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
-final readonly class SpreadsheetToSingleCsvFileWriterProbe implements SerializedWriterProbe
+final readonly class SpreadsheetToSingleCsvFileWriterFactory implements SerializedWriterFactory
 {
     public function __construct(private string $basename)
     {

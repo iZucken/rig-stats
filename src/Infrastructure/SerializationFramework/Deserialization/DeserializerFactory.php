@@ -11,7 +11,7 @@ use RigStats\Infrastructure\SerializationFramework\Types\Type;
  * @template Carrier
  * @template Target
  */
-interface DeserializerProbe
+interface DeserializerFactory
 {
     /**
      * @param Serialized<Carrier> $data

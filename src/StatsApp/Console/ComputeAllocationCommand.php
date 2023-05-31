@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Console;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use RigStats\Infrastructure\SerializationFramework\IO\JsonToFileWriterProbe;
-use RigStats\Infrastructure\SerializationFramework\IO\PlaintextToSymfonyOutputInterfaceWriterProbe;
-use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFileWriterProbe;
-use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterProbe;
-use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterProbe;
-use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerProbe;
+use RigStats\Infrastructure\SerializationFramework\IO\JsonToFileWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\IO\PlaintextToSymfonyOutputInterfaceWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFileWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\RigModel\Extraction\ExtractionDaySeries;
 use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\PlainDeserializerCollection;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
-use RigStats\StatsApp\Serializers\AllocationSeriesMultiProbe;
-use RigStats\StatsApp\Serializers\ExtractionDaySeriesProbe;
-use RigStats\StatsApp\Serializers\InvalidDayRatesMultiProbe;
+use RigStats\StatsApp\Serializers\AllocationSeriesFactory;
+use RigStats\StatsApp\Serializers\ExtractionDaySeriesFactory;
+use RigStats\StatsApp\Serializers\InvalidDayRatesMultiFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,24 +51,26 @@ final class ComputeAllocationCommand extends Command
             return Command::INVALID;
         }
         $deserializerProbes = new PlainDeserializerCollection([
-            new ExtractionDaySeriesProbe
+            new ExtractionDaySeriesFactory
         ]);
         // todo: options to toggle output types
         $serializers = [
-            new AllocationSeriesMultiProbe,
-            new InvalidDayRatesMultiProbe,
+            new AllocationSeriesFactory,
+            new InvalidDayRatesMultiFactory,
         ];
+        $outputBasename = 'output/computation';
         $outputWriters = [
-            'json' => new JsonToFileWriterProbe('output/computation'),
-            'xlsx' => new SpreadsheetToXlsxFileWriterProbe('output/computation'),
-            'csv' => new SpreadsheetToSingleCsvFileWriterProbe('output/computation'),
+            'json' => new JsonToFileWriterFactory($outputBasename),
+            'xlsx' => new SpreadsheetToXlsxFileWriterFactory($outputBasename),
+            'csv' => new SpreadsheetToSingleCsvFileWriterFactory($outputBasename),
         ];
+        $errorOutputBasename = 'output/computation';
         $errorWriters = [
-            'stdio' => new PlaintextToSymfonyOutputInterfaceWriterProbe($output),
-            'xlsx' => new SpreadsheetToXlsxFileWriterProbe('output/errors'),
+            'stdio' => new PlaintextToSymfonyOutputInterfaceWriterFactory($output),
+            'xlsx' => new SpreadsheetToXlsxFileWriterFactory($errorOutputBasename),
         ];
         $serialized = new PhpSpreadsheet(IOFactory::load($inputFilename));
-        $deserializer = $deserializerProbes->probe($serialized, $sourceType);
+        $deserializer = $deserializerProbes->deserializable($serialized, $sourceType);
         if (!$deserializer) {
             $output->writeln("{$serialized->describe()} is not deserializable into any known type.");
             return Command::INVALID;
@@ -94,8 +96,8 @@ final class ComputeAllocationCommand extends Command
     /**
      * @param mixed $data
      * @param OutputInterface $output
-     * @param SerializerProbe[] $serializers
-     * @param SerializedWriterProbe[] $writers
+     * @param SerializerFactory[] $serializers
+     * @param SerializedWriterFactory[] $writers
      * @return void
      */
     private function writeAll(mixed $data, OutputInterface $output, array $serializers, array $writers)

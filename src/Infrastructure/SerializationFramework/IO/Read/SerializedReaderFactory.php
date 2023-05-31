@@ -9,7 +9,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 /**
  * @template ContainerType
  */
-interface SerializedReaderProbe
+interface SerializedReaderFactory
 {
     /**
      * @return Serialized<ContainerType>

@@ -10,7 +10,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 /**
  * @template Format
  */
-interface SerializedWriterProbe
+interface SerializedWriterFactory
 {
     /**
      * @return Format<Format>[]

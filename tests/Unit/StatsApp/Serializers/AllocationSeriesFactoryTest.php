@@ -4,7 +4,7 @@ namespace Unit\StatsApp\Serializers;
 
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
 use RigStats\StatsApp\Serializers\AllocationSeriesJson;
-use RigStats\StatsApp\Serializers\AllocationSeriesMultiProbe;
+use RigStats\StatsApp\Serializers\AllocationSeriesFactory;
 use PHPUnit\Framework\TestCase;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
@@ -12,13 +12,13 @@ use RigStats\RigModel\RateAllocation\AllocationDaySeries;
 use RigStats\StatsApp\Serializers\AllocationSeriesSpreadsheet;
 
 /**
- * @covers AllocationSeriesMultiProbe
+ * @covers AllocationSeriesFactory
  */
-class AllocationSeriesMultiProbeTest extends TestCase
+class AllocationSeriesFactoryTest extends TestCase
 {
     public function testSerializable()
     {
-        $probe = new AllocationSeriesMultiProbe();
+        $probe = new AllocationSeriesFactory();
         $maybeValidData = new AllocationDaySeries([]);
         $this->assertNull($probe->serializable(null, Json::getFormat()));
         $this->assertNull($probe->serializable($maybeValidData, Plaintext::getFormat()));

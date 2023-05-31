@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace RigStats\Infrastructure\SerializationFramework\IO;
 
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriter;
-use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterProbe;
+use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
-use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 
 /**
- * @template-extends SerializedWriterProbe<PhpSpreadsheet>
+ * @template-extends SerializedWriterFactory<Json>
  */
-final readonly class SpreadsheetToXlsxFileWriterProbe implements SerializedWriterProbe
+final readonly class JsonToFileWriterFactory implements SerializedWriterFactory
 {
     public function __construct(private string $basename)
     {
@@ -20,13 +20,13 @@ final readonly class SpreadsheetToXlsxFileWriterProbe implements SerializedWrite
 
     public function formats(): array
     {
-        return [PhpSpreadsheet::getFormat()];
+        return [Json::getFormat()];
     }
 
     public function writable(Serialized $data): ?SerializedWriter
     {
-        if ($data instanceof PhpSpreadsheet) {
-            return new SpreadsheetToXlsxFileWriter($this->basename, $data);
+        if ($data instanceof Json) {
+            return new JsonToFileWriter($this->basename, $data);
         }
         return null;
     }

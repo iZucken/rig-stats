@@ -8,9 +8,9 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\RigModel\RateAllocation\AllocationDaySeries;
 use RigStats\Infrastructure\SerializationFramework\Format;
-use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerProbe;
+use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 
-final class AllocationSeriesMultiProbe implements SerializerProbe
+final class AllocationSeriesFactory implements SerializerFactory
 {
     public function serializable(mixed $data, Format $format): null|AllocationSeriesJson|AllocationSeriesSpreadsheet
     {
