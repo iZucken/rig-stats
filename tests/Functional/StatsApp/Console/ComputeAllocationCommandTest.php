@@ -2,6 +2,7 @@
 
 namespace Functional\StatsApp\Console;
 
+use PhpOffice\PhpSpreadsheet\Settings;
 use PHPUnit\Framework\TestCase;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactoryCollection;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactoryCollection;
@@ -31,6 +32,12 @@ class ComputeAllocationCommandTest extends TestCase
         ));
     }
 
+    protected function tearDown(): void
+    {
+        // todo: see why worksheet cache is not cleared automatically; too bad its global
+        Settings::getCache()->clear();
+    }
+
     public function testItFailsOnInvalidFile() {
         $this->sut->execute([
             'inputFilename' => 'foobar',
@@ -57,5 +64,16 @@ class ComputeAllocationCommandTest extends TestCase
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid.xlsx',
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+    }
+
+    public function testItRunsOnValidDataWithCustomPath() {
+        $tmpName = tempnam('/tmp', 'output.');
+        $this->sut->execute([
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid.xlsx',
+            'outputBasename' => $tmpName,
+        ]);
+        $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertFileExists($tmpName . '.xlsx');
+        unlink($tmpName . '.xlsx');
     }
 }

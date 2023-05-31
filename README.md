@@ -7,22 +7,24 @@ Command to compute rig layer split rates from rig stat input files. It is consci
 Setup when using docker compose assuming current working directory in package root:
 1. `cp .env.example .env` and change according to your needs
 2. Run `docker-compose run composer install`
-3. Run samples in `docker-compose run php ./sampleUsage.sh` to verify your setup works
-4. Optionally run tests `docker-compose run php vendor/bin/phpunit tests`
+3. Run samples with `docker-compose run php ./sampleUsage.sh` to verify your setup works
 
 ### Input\Output
 
-You may pass input files using command arguments e.g. `./rigstats.php compute:allocation $filename`.
-Output files are saved in `$(cwd)/output/*` with appropriate suffixes.
-Results by default are written to console if and as appropriate.
-See input examples in `tests/examples/*`.
+Refer to `--help` to find out how to pass input\output file names.
+Writers save files with appropriate suffixes, so you only have to specify base names.
+Results by default are also written to console if and as appropriate.
+Currently the command will try to output results in all possible formats which include stdio/console, csv, xlsx and json for which the output has corresponding implementation.
 
 ### Validation
 
+Basic rules:
+- Source data is checked for validity when possible according to the specific model.
+- Data format and placement is mostly assumed to be correct by the contract.
+- Invalid inputs are likely to fail.
+- Error outputs are formatted on per error type basis.
+
 For allocation compute source files, layer split data represents rate percentage per layer and must add up to 100% with at least 1e-5 accuracy.
-This is checked for validity when running the command.
-All other data is assumed to be correct by the contract.
-Invalid inputs are likely to fail.
 
 Sample error data for allocation computation when using console output:
 ```text

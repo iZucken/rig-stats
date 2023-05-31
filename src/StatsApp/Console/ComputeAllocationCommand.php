@@ -36,11 +36,16 @@ final class ComputeAllocationCommand extends Command
     protected function configure(): void
     {
         $this
-            // todo: options to set output file
             ->addArgument(
                 "inputFilename",
                 InputArgument::REQUIRED,
-                "Input data stored in xlsx compatible worksheet file."
+                "Input data stored in xlsx compatible worksheet file.",
+            )
+            ->addArgument(
+                "outputBasename",
+                InputArgument::OPTIONAL,
+                "Basename for output files when using file writable formats.",
+                'output/compute',
             );
     }
 
@@ -54,8 +59,8 @@ final class ComputeAllocationCommand extends Command
             $output->writeln("Cannot read from $inputFilename");
             return Command::INVALID;
         }
+        $outputBasename = $input->getArgument("outputBasename");
         // todo: options to toggle output types
-        $outputBasename = 'output/computation';
         $outputWriters = [
             'stdio' => new PlaintextToSymfonyOutputInterfaceWriterFactory($output),
             'json' => new JsonToFileWriterFactory($outputBasename),
