@@ -11,10 +11,10 @@ Setup when using docker compose assuming current working directory in package ro
 
 ### Input\Output
 
-Refer to `--help` to find out how to pass input\output file names.
-Writers save files with appropriate suffixes, so you only have to specify base names.
-Results by default are also written to console if and as appropriate.
-Currently the command will try to output results in all possible formats which include stdio/console, csv, xlsx and json for which the output has corresponding implementation.
+Refer to `--help` to find out how to pass input\output file names and choose write methods.
+File writers save files with appropriate suffixes, so you only have to specify base names.
+Results are also written to console when appropriate.
+The command will try to output results in all selected formats which have corresponding implementation.
 
 ### Validation
 
@@ -28,7 +28,6 @@ For allocation compute source files, layer split data represents rate percentage
 
 Sample error data for allocation computation when using console output:
 ```text
-Input data contains errors.
 Writing plain text (892 bytes) to generic output
 At 2022-12-01 #92 for oil: Split data sum error by -41.61%
 At 2022-12-01 #154 for gas: Split data sum error by -15.15%
