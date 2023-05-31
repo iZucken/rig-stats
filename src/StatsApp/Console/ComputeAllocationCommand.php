@@ -7,6 +7,7 @@ namespace RigStats\StatsApp\Console;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\JsonToFileWriterProbe;
 use RigStats\Infrastructure\SerializationFramework\IO\PlaintextToSymfonyOutputInterfaceWriterProbe;
+use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFileWriterProbe;
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterProbe;
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterProbe;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerProbe;
@@ -60,6 +61,7 @@ final class ComputeAllocationCommand extends Command
         $outputWriters = [
             'json' => new JsonToFileWriterProbe('output/computation'),
             'xlsx' => new SpreadsheetToXlsxFileWriterProbe('output/computation'),
+            'csv' => new SpreadsheetToSingleCsvFileWriterProbe('output/computation'),
         ];
         $errorWriters = [
             'stdio' => new PlaintextToSymfonyOutputInterfaceWriterProbe($output),

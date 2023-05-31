@@ -15,7 +15,8 @@ final readonly class PhpSpreadsheet implements Serialized
 
     public function describe(): string
     {
-        return "php-spreadsheet";
+        $sheets = join("; ", array_map(fn ($sheet) => $sheet->getTitle(), $this->spreadsheet->getAllSheets()));
+        return "php-spreadsheet ($sheets)";
     }
 
     public static function getFormat(): Format
