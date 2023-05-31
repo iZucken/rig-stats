@@ -3,7 +3,12 @@
 namespace Functional\StatsApp\Console;
 
 use PHPUnit\Framework\TestCase;
+use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactoryCollection;
+use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactoryCollection;
 use RigStats\StatsApp\Console\ComputeAllocationCommand;
+use RigStats\StatsApp\Serializers\AllocationSeriesFactory;
+use RigStats\StatsApp\Serializers\ExtractionDaySeriesFactory;
+use RigStats\StatsApp\Serializers\InvalidDayRatesMultiFactory;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -15,7 +20,15 @@ class ComputeAllocationCommandTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->sut = new CommandTester(new ComputeAllocationCommand);
+        $this->sut = new CommandTester(new ComputeAllocationCommand(
+            new SerializerFactoryCollection([
+                new AllocationSeriesFactory(),
+                new InvalidDayRatesMultiFactory(),
+            ]),
+            new DeserializerFactoryCollection([
+                new ExtractionDaySeriesFactory(),
+            ]),
+        ));
     }
 
     public function testItFailsOnInvalidFile() {

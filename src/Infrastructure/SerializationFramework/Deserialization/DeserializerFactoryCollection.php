@@ -7,7 +7,7 @@ namespace RigStats\Infrastructure\SerializationFramework\Deserialization;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
-final readonly class PlainDeserializerCollection
+final readonly class DeserializerFactoryCollection implements DeserializerFactory
 {
     /**
      * @param DeserializerFactory[] $probes
