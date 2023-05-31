@@ -21,58 +21,95 @@ class ComputeAllocationCommandTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->sut = new CommandTester(new ComputeAllocationCommand(
-            new SerializerFactoryCollection([
-                new AllocationSeriesFactory(),
-                new InvalidDayRatesMultiFactory(),
-            ]),
-            new DeserializerFactoryCollection([
-                new ExtractionDaySeriesFactory(),
-            ]),
-        ));
+        $this->sut = new CommandTester(
+            new ComputeAllocationCommand(
+                new SerializerFactoryCollection([
+                    new AllocationSeriesFactory(),
+                    new InvalidDayRatesMultiFactory(),
+                ]),
+                new DeserializerFactoryCollection([
+                    new ExtractionDaySeriesFactory(),
+                ]),
+            )
+        );
     }
 
     protected function tearDown(): void
     {
-        // todo: see why worksheet cache is not cleared automatically; too bad its global
+        // todo: see why worksheet cache is not cleared automatically; too bad its global; partially solved by using small sample files
         Settings::getCache()->clear();
     }
 
-    public function testItFailsOnInvalidFile() {
+    public function testItFailsOnInvalidFile()
+    {
         $this->sut->execute([
             'inputFilename' => 'foobar',
         ]);
+        $this->assertEquals("Cannot read from foobar.\n", $this->sut->getDisplay());
         $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
     }
 
-    public function testItFailsOnUnknownSpreadsheetType() {
+    public function testItFailsOnUnknownSpreadsheetType()
+    {
         $this->sut->execute([
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/unknownSpreadsheet.xlsx',
         ]);
         $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertEquals("php-spreadsheet (rates) is not deserializable into any known type.\n", $this->sut->getDisplay());
     }
 
-    public function testItFailsOnInvalidData() {
+    public function testItFailsOnInvalidData()
+    {
         $this->sut->execute([
-            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/invalid.xlsx',
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/invalid_lite.xlsx',
         ]);
         $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertStringContainsString("Input data contains errors.", $this->sut->getDisplay());
     }
 
-    public function testItRunsOnValidData() {
+    public function testItFailsOnInvalidWriterOptions()
+    {
         $this->sut->execute([
-            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid.xlsx',
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
+            '--writer' => ['oops'],
+        ]);
+        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertEquals(
+            "There is no `--writer` for oops; supported `--writer` options are: stdio, json, xlsx, csv.\n",
+            $this->sut->getDisplay()
+        );
+    }
+
+    public function testItRunsWithWarningsOnMissingWriter()
+    {
+        $this->sut->execute([
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
+            '--writer' => ['stdio'],
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete.\n", $this->sut->getDisplay());
+        $this->assertStringContainsString("No compatible output for", $this->sut->getDisplay());
     }
 
-    public function testItRunsOnValidDataWithCustomPath() {
+    public function testItRunsOnValidData()
+    {
+        $this->sut->execute([
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
+        ]);
+        $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertEquals("Computation complete.\n", $this->sut->getDisplay());
+    }
+
+    public function testItRunsOnValidDataWithCustomPath()
+    {
         $tmpName = tempnam('/tmp', 'output.');
         $this->sut->execute([
-            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid.xlsx',
+            'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
             'outputBasename' => $tmpName,
+            '--writer' => ['xlsx'],
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
+        $this->assertStringContainsString("Computation complete.\n", $this->sut->getDisplay());
         $this->assertFileExists($tmpName . '.xlsx');
         unlink($tmpName . '.xlsx');
     }

@@ -12,6 +12,7 @@ use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFile
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
+use RigStats\Infrastructure\Types\TypeDescriber;
 use RigStats\RigModel\Extraction\ExtractionDaySeries;
 use RigStats\RigModel\Extraction\ExtractionDataCorruptionException;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
@@ -19,6 +20,7 @@ use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class ComputeAllocationCommand extends Command
@@ -46,6 +48,13 @@ final class ComputeAllocationCommand extends Command
                 InputArgument::OPTIONAL,
                 "Basename for output files when using file writable formats.",
                 'output/compute',
+            )
+            ->addOption(
+                "writer",
+                "w",
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
+                "Output writers. Output data is written using every compatible writer. Supports: stdio, csv, xlsx, json.",
+                [],
             );
     }
 
@@ -56,17 +65,26 @@ final class ComputeAllocationCommand extends Command
         $sourceType = new ClassType(ExtractionDaySeries::class);
         $inputFilename = $input->getArgument("inputFilename");
         if (!(is_file($inputFilename) && is_readable($inputFilename))) {
-            $output->writeln("Cannot read from $inputFilename");
+            $output->writeln("Cannot read from $inputFilename.");
             return Command::INVALID;
         }
         $outputBasename = $input->getArgument("outputBasename");
         // todo: options to toggle output types
-        $outputWriters = [
+        $writers = [
             'stdio' => new PlaintextToSymfonyOutputInterfaceWriterFactory($output),
             'json' => new JsonToFileWriterFactory($outputBasename),
             'xlsx' => new SpreadsheetToXlsxFileWriterFactory($outputBasename),
             'csv' => new SpreadsheetToSingleCsvFileWriterFactory($outputBasename),
         ];
+        $chosenWriters = $input->getOption("writer");
+        if (count($extras = array_diff($chosenWriters, array_keys($writers)))) {
+            $output->writeln(
+                "There is no `--writer` for " . join(", ", $extras)
+                . "; supported `--writer` options are: " . join(", ", array_keys($writers)) . "."
+            );
+            return Command::INVALID;
+        }
+        $writers = array_intersect_key($writers, array_combine($chosenWriters, $chosenWriters));
         $serialized = new PhpSpreadsheet(IOFactory::load($inputFilename));
         $deserializer = $this->deserializers->deserializable($serialized, $sourceType);
         if (!$deserializer) {
@@ -77,18 +95,19 @@ final class ComputeAllocationCommand extends Command
         if (!($loadedModel instanceof ExtractionDaySeries)) {
             // todo: test when other data type is possible
             $output->writeln(
-                "This program only supports " . ExtractionDaySeries::class . ", but got " . gettype($loadedModel)
+                "This program only supports " . ExtractionDaySeries::class
+                . ", but got " . TypeDescriber::describe($loadedModel)
             );
             return Command::INVALID;
         }
         try {
             $compute = $loadedModel->toAllocations();
             $output->writeln("Computation complete.");
-            $this->writeAll($compute, $output, $outputWriters);
+            $this->writeAll($compute, $output, $writers);
             return Command::SUCCESS;
         } catch (ExtractionDataCorruptionException $exception) {
             $output->writeln("Input data contains errors.");
-            $this->writeAll($exception, $output, $outputWriters);
+            $this->writeAll($exception, $output, $writers);
             return Command::INVALID;
         }
     }
@@ -105,14 +124,22 @@ final class ComputeAllocationCommand extends Command
         array $writers
     ) {
         foreach ($writers as $writer) {
+            $atLeastOneFormat = false;
             foreach ($writer->formats() as $writerFormat) {
                 if ($serializable = $this->serializers->serializable($data, $writerFormat)) {
                     $serialized = $serializable->serialize();
                     if ($writable = $writer->writable($serialized)) {
                         $output->writeln($writable->describe());
                         $writable->write();
+                        $atLeastOneFormat = true;
                     }
                 }
+            }
+            if (!$atLeastOneFormat) {
+                $output->writeln(
+                    "No compatible output for " . get_class($writer)
+                    . " on " . TypeDescriber::describe($data)
+                );
             }
         }
     }
