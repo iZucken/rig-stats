@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace RigStats\RigModel\Fluids;
 
-use RigStats\RigModel\Fluids\FluidType;
-
 final readonly class FluidRate
 {
     public FluidType $type;

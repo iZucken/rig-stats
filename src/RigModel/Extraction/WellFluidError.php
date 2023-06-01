@@ -7,14 +7,13 @@ namespace RigStats\RigModel\Extraction;
 use RigStats\RigModel\Fluids\FluidType;
 use RigStats\RigModel\Rig\WellId;
 
-final readonly class WellFluidDayError
+final readonly class WellFluidError
 {
     public function __construct(
-        public \DateTimeInterface $day,
+        public \DateTimeInterface $at,
         public WellId $well,
         public FluidType $fluid,
         public string $error,
     ) {
-        // todo: maybe not a day...
     }
 }

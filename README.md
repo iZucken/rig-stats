@@ -29,6 +29,13 @@ Supported computations are baked into the command.
 
 For allocation compute source files, layer split data represents rate percentage per layer and must add up to 100% with at least 1e-5 accuracy.
 
+Considered inconsequential or up to the user (a lot but the again this is just a test):
+- time slice sequencing
+- whether time slice refers to a day
+- well layers stability between days
+- duplicate time slices or wells will be merged
+- whether layer data is consistent between time slices
+
 ##### "Extraction rates\splits series" into "Split allocation series"
 
 For allocation computation layer rates are computed using `layer_rate = well_rate * layer_split / 100`.

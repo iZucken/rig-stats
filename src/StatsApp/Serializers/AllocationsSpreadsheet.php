@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use RigStats\RigModel\Fluids\FluidRate;
-use RigStats\RigModel\RateAllocation\AllocationDays;
+use RigStats\RigModel\Fluids\FluidSplitRate;
+use RigStats\RigModel\RateAllocation\Allocations;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class AllocationDaysSpreadsheet implements Serializer
+final readonly class AllocationsSpreadsheet implements Serializer
 {
-    public function __construct(private AllocationDays $data)
+    public function __construct(private Allocations $data)
     {
     }
 
@@ -22,28 +22,35 @@ final readonly class AllocationDaysSpreadsheet implements Serializer
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('allocations');
-        foreach (
+        $reference = $this->data->allocations[0];
+        $keys = array_merge(
             [
                 'dt',
                 'well_id',
                 'layer_id',
-                'oil_rate',
-                'gas_rate',
-                'water_rate',
-            ] as $index => $key
-        ) {
+            ],
+            array_reduce(
+                $reference->rates,
+                fn(array $rates, FluidSplitRate $rate) => [
+                    ...$rates,
+                    "{$rate->split->type->value}_rate",
+                ],
+                []
+            ),
+        );
+        foreach ($keys as $index => $key) {
             $sheet->setCellValue([$index + 1, 1], $key);
         }
-        foreach ($this->data->days as $rowIndex => $row) {
+        foreach ($this->data->allocations as $rowIndex => $row) {
             $serialRow = array_merge(
                 [
-                    $row->day->format("Y-m-d H:i:s"),
+                    $row->at->format("Y-m-d H:i:s"),
                     $row->layer->well->id,
                     $row->layer->id,
                 ],
                 array_reduce(
                     $row->rates,
-                    fn(array $rates, FluidRate $rate) => [...$rates, $rate->value],
+                    fn(array $rates, FluidSplitRate $rate) => [...$rates, $rate->getSplitRateValue()->value],
                     []
                 ),
             );

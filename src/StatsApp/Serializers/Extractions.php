@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace RigStats\StatsApp\Serializers;
 
-use RigStats\RigModel\Extraction\ExtractionDay;
-use RigStats\RigModel\Extraction\ExtractionDays as ExtractionDaysModel;
+use RigStats\RigModel\Extraction\Extraction;
+use RigStats\RigModel\Extraction\Extractions as ExtractionsModel;
 use RigStats\RigModel\Extraction\ExtractionLayer;
 use RigStats\RigModel\Fluids\FluidRate;
 use RigStats\RigModel\Fluids\FluidSplit;
@@ -17,9 +17,9 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
 /**
- * @template-extends Deserializer<PhpSpreadsheet, ExtractionDaysModel>
+ * @template-extends Deserializer<PhpSpreadsheet, ExtractionsModel>
  */
-final readonly class ExtractionDays implements Deserializer
+final readonly class Extractions implements Deserializer
 {
     public function __construct(private PhpSpreadsheet $carrier, private Type $type, private float $epsilon)
     {
@@ -35,7 +35,7 @@ final readonly class ExtractionDays implements Deserializer
         return $this->type;
     }
 
-    public function deserialize(): ExtractionDaysModel
+    public function deserialize(): ExtractionsModel
     {
         $rates = $this->carrier->getData()->getSheetByName("rates")->toArray();
         $splits = $this->carrier->getData()->getSheetByName("splits")->toArray();
@@ -66,7 +66,7 @@ final readonly class ExtractionDays implements Deserializer
         foreach ($merge as $date => $wells) {
             foreach ($wells as $wellId => $well) {
                 $wellId = new WellId(intval($wellId));
-                $data[] = (new ExtractionDay(
+                $data[] = (new Extraction(
                     \DateTimeImmutable::createFromFormat("Y-m-d", $date),
                     $well['rates'],
                     array_map(fn (array $layer) => new ExtractionLayer(
@@ -77,6 +77,6 @@ final readonly class ExtractionDays implements Deserializer
                 ));
             }
         }
-        return new ExtractionDaysModel($data);
+        return new ExtractionsModel($data);
     }
 }

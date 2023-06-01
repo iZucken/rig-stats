@@ -13,8 +13,7 @@ use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWrite
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\Types\TypeDescriber;
-use RigStats\RigModel\Extraction\ExtractionDays;
-use RigStats\RigModel\Extraction\WellFluidDayErrors;
+use RigStats\RigModel\Extraction\Extractions;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
 use Symfony\Component\Console\Command\Command;
@@ -62,7 +61,7 @@ final class ComputeAllocationCommand extends Command
     {
         // todo: ideally do something about this global state, maybe push it into serializer context
         ini_set('serialize_precision', 14);
-        $sourceType = new ClassType(ExtractionDays::class);
+        $sourceType = new ClassType(Extractions::class);
         $inputFilename = $input->getArgument("inputFilename");
         if (!(is_file($inputFilename) && is_readable($inputFilename))) {
             $output->writeln("Cannot read from $inputFilename.");
@@ -92,10 +91,10 @@ final class ComputeAllocationCommand extends Command
             return Command::INVALID;
         }
         $loadedModel = $deserializer->deserialize();
-        if (!($loadedModel instanceof ExtractionDays)) {
+        if (!($loadedModel instanceof Extractions)) {
             // todo: test when other data type is possible
             $output->writeln(
-                "This program only supports " . ExtractionDays::class
+                "This program only supports " . Extractions::class
                 . ", but got " . TypeDescriber::describe($loadedModel)
             );
             return Command::INVALID;

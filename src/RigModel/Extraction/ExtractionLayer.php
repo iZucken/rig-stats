@@ -16,6 +16,9 @@ final readonly class ExtractionLayer
          */
         public array $splits,
     ) {
-        // todo: maybe duplicate split types
+        $types = array_reduce($splits, fn ($a, $r) => [$r->type->name => $r->type->name, ...$a], []);
+        if (count($splits) - count($types) !== 0) {
+            throw new \LogicException("Unexpected duplicate rate readings.");
+        }
     }
 }

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use RigStats\RigModel\Extraction\WellFluidDayErrors;
+use RigStats\RigModel\Extraction\WellFluidErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
-final readonly class WellFluidDayErrorsSpreadsheet implements Serializer
+final readonly class WellFluidErrorsSpreadsheet implements Serializer
 {
-    public function __construct(private WellFluidDayErrors $error)
+    public function __construct(private WellFluidErrors $error)
     {
     }
 
@@ -25,7 +25,7 @@ final readonly class WellFluidDayErrorsSpreadsheet implements Serializer
         }
         foreach ($this->error->errors as $rowIndex => $error) {
             $rowData = [
-                $error->day->format("Y-m-d H:i:s"),
+                $error->at->format("Y-m-d H:i:s"),
                 $error->well->id,
                 $error->fluid->value,
                 $error->error,

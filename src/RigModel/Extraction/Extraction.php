@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace RigStats\RigModel\Extraction;
 
 use RigStats\RigModel\Fluids\FluidRate;
+use RigStats\RigModel\Fluids\FluidSplitRate;
 use RigStats\RigModel\Fluids\FluidType;
-use RigStats\RigModel\RateAllocation\AllocationDay;
+use RigStats\RigModel\RateAllocation\Allocation;
 
-final readonly class ExtractionDay
+final readonly class Extraction
 {
     public function __construct(
-        public \DateTimeInterface $day,
+        public \DateTimeInterface $at,
         /**
          * @var FluidRate[]
          */
@@ -22,13 +23,14 @@ final readonly class ExtractionDay
         public array $layers,
         public float $epsilon,
     ) {
-        // todo: maybe not a day...
-        // todo: maybe duplicate rate types
-        // todo: maybe invalid type intersection
+        $types = array_reduce($rates, fn ($a, $r) => [$r->type->name => $r->type->name, ...$a], []);
+        if (count($rates) - count($types) !== 0) {
+            throw new \LogicException("Unexpected duplicate rate readings.");
+        }
     }
 
     /**
-     * @return WellFluidDayError[]
+     * @return WellFluidError[]
      */
     public function getInvalidRates(): array
     {
@@ -46,8 +48,8 @@ final readonly class ExtractionDay
         foreach ($sums as $fluid => $sum) {
             $error = $sum - 100;
             if (abs($error) > $this->epsilon) {
-                $errors[] = new WellFluidDayError(
-                    $this->day,
+                $errors[] = new WellFluidError(
+                    $this->at,
                     $this->layers[0]->layer->well,
                     FluidType::from($fluid),
                     sprintf("Split data sum error by %.2f%%", $error),
@@ -58,7 +60,7 @@ final readonly class ExtractionDay
     }
 
     /**
-     * @return AllocationDay[]
+     * @return Allocation[]
      */
     public function toAllocationDays(): array
     {
@@ -69,10 +71,18 @@ final readonly class ExtractionDay
                 $relatedRate = array_values(
                     array_filter($this->rates, fn($rate) => $rate->type === $split->type)
                 )[0];
-                $relativeRates[] = new FluidRate($split->type, $relatedRate->value * $split->value / 100.0);
+                $relativeRates[] = new FluidSplitRate($split, $relatedRate);
             }
-            $days[] = new AllocationDay($this->day, $layer->layer, $relativeRates);
+            $days[] = new Allocation($this->at, $layer->layer, $relativeRates);
         }
         return $days;
+    }
+
+    public function comparable(Extraction $reference): bool
+    {
+        return empty(array_diff(
+            array_map(fn ($rate) => $rate->type->name, $this->rates),
+            array_map(fn ($rate) => $rate->type->name, $reference->rates),
+        ));
     }
 }
