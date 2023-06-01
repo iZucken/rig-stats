@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace RigStats\Infrastructure\SerializationFramework\Deserialization;
 
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
-use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
 /**
  * @template Carrier
@@ -15,8 +14,7 @@ interface DeserializerFactory
 {
     /**
      * @param Serialized<Carrier> $data
-     * @param Type<Target> $type
-     * @return null|Deserializer<Carrier, Target>
+     * @return null|Deserializer<Target>
      */
-    public function deserializable(Serialized $data, Type $type): ?Deserializer;
+    public function deserializable(Serialized $data): ?Deserializer;
 }

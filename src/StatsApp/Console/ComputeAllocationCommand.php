@@ -14,7 +14,6 @@ use RigStats\Infrastructure\SerializationFramework\IO\XlsxFileToSpreadsheetReade
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\Types\TypeDescriber;
 use RigStats\RigModel\Extraction\Extractions;
-use RigStats\Infrastructure\SerializationFramework\Types\ClassType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -83,27 +82,23 @@ final class ComputeAllocationCommand extends Command
         }
         $writers = array_intersect_key($writers, array_combine($chosenWriters, $chosenWriters));
         foreach ($readers as $readerFactory) {
-            if ($reader = $readerFactory->readable()) {
-                if ($serialized = $reader->read()) {
-                    $sourceType = new ClassType(Extractions::class);
-                    if ($deserializer = $this->deserializers->deserializable($serialized, $sourceType)) {
-                        $loadedModel = $deserializer->deserialize();
-                        if ($loadedModel instanceof Extractions) {
-                            $computed = $loadedModel->intoAllocationDaysOrInvalidRates();
-                            $this->output->writeln("Computation complete into " . TypeDescriber::describe($computed));
-                            $this->writeAll($computed, $writers);
-                            return Command::SUCCESS;
-                        }
-                        // todo: test when other data type is possible
-                        $this->output->writeln(
-                            "This program only supports " . Extractions::class
-                            . ", but got " . TypeDescriber::describe($loadedModel)
-                        );
-                        return Command::INVALID;
+            if ($serialized = $readerFactory->readable()?->read()) {
+                if ($loadedModel = $this->deserializers->deserializable($serialized)?->deserialize()) {
+                    if ($loadedModel instanceof Extractions) {
+                        $computed = $loadedModel->intoAllocationDaysOrInvalidRates();
+                        $this->output->writeln("Computation complete into " . TypeDescriber::describe($computed));
+                        $this->writeAll($computed, $writers);
+                        return Command::SUCCESS;
                     }
-                    $this->output->writeln("{$serialized->describe()} is not deserializable into any known type.");
+                    // todo: test when other data type is possible
+                    $this->output->writeln(
+                        "This program only supports " . Extractions::class
+                        . ", but got " . TypeDescriber::describe($loadedModel)
+                    );
                     return Command::INVALID;
                 }
+                $this->output->writeln("{$serialized->describe()} is not deserializable into any known type.");
+                return Command::INVALID;
             }
         }
         $this->output->writeln("Failed to read the input into any known container type.");
@@ -123,8 +118,7 @@ final class ComputeAllocationCommand extends Command
             $atLeastOneFormat = false;
             foreach ($writer->formats() as $writerFormat) {
                 if ($serializable = $this->serializers->serializable($data, $writerFormat)) {
-                    $serialized = $serializable->serialize();
-                    if ($writable = $writer->writable($serialized)) {
+                    if ($writable = $writer->writable($serializable->serialize())) {
                         $this->output->writeln($writable->describe());
                         $writable->write();
                         $atLeastOneFormat = true;

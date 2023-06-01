@@ -14,25 +14,14 @@ use RigStats\RigModel\Rig\LayerId;
 use RigStats\RigModel\Rig\WellId;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\Deserializer;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
-use RigStats\Infrastructure\SerializationFramework\Types\Type;
 
 /**
  * @template-extends Deserializer<PhpSpreadsheet, ExtractionsModel>
  */
 final readonly class Extractions implements Deserializer
 {
-    public function __construct(private PhpSpreadsheet $carrier, private Type $type, private float $epsilon)
+    public function __construct(private PhpSpreadsheet $carrier, private float $epsilon)
     {
-    }
-
-    public function getCarrier(): PhpSpreadsheet
-    {
-        return $this->carrier;
-    }
-
-    public function getType(): Type
-    {
-        return $this->type;
     }
 
     public function deserialize(): ExtractionsModel
