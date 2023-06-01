@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace RigStats\Infrastructure\SerializationFramework\IO\Read;
 
-use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
-
 /**
  * @template ContainerType
  */
 interface SerializedReaderFactory
 {
     /**
-     * @return Serialized<ContainerType>
+     * @return null|SerializedReader<ContainerType>
      */
-    public function readable(): Serialized;
+    public function readable(): ?SerializedReader;
 }

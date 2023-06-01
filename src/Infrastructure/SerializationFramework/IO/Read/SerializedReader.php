@@ -7,12 +7,12 @@ namespace RigStats\Infrastructure\SerializationFramework\IO\Read;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
- * @template Data
+ * @template ContainerType
  */
 interface SerializedReader
 {
     /**
-     * @return Serialized<Data>
+     * @return Serialized<ContainerType>
      */
     public function read(): Serialized;
 }

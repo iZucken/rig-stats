@@ -47,7 +47,7 @@ class ComputeAllocationCommandTest extends TestCase
         $this->sut->execute([
             'inputFilename' => 'foobar',
         ]);
-        $this->assertEquals("Cannot read from foobar.\n", $this->sut->getDisplay());
+        $this->assertEquals("Failed to read the input into any known container type.\n", $this->sut->getDisplay());
         $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
     }
 
