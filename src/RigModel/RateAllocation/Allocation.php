@@ -19,7 +19,7 @@ final readonly class Allocation
     ) {
         $types = array_reduce($rates, fn ($a, $r) => [$r->type->name => $r->type->name, ...$a], []);
         if (count($rates) - count($types) !== 0) {
-            throw new \LogicException("Unexpected duplicate rate readings.");
+            throw new \InvalidArgumentException("Unexpected duplicate rate readings.");
         }
     }
 

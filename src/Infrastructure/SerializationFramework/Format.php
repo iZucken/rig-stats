@@ -17,7 +17,7 @@ final readonly class Format
     public function __construct(private string $format)
     {
         if (!class_exists($format) || !in_array(Serialized::class, class_implements($format) ?: [])) {
-            throw new \LogicException("Invalid format value $format");
+            throw new \InvalidArgumentException("Invalid format value $format");
         }
     }
 

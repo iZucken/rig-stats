@@ -19,10 +19,10 @@ final readonly class Allocations
         $reference = $allocations[0];
         foreach ($allocations as $allocation) {
             if (!($allocation instanceof Allocation)) {
-                throw new \LogicException("Invalid collection element " . TypeDescriber::describe($allocation));
+                throw new \InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($allocation));
             }
             if (!$allocation->comparable($reference)) {
-                throw new \LogicException("Encountered incompatible generic elements");
+                throw new \InvalidArgumentException("Encountered incompatible generic elements");
             }
         }
     }

@@ -15,7 +15,7 @@ final readonly class ClassType implements Type
     public function __construct(public string $className)
     {
         if (!class_exists($className)) {
-            throw new \LogicException("Undefined $className");
+            throw new \InvalidArgumentException("Undefined $className");
         }
     }
 

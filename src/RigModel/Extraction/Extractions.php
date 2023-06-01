@@ -20,10 +20,10 @@ final readonly class Extractions
         $reference = $extractions[0];
         foreach ($extractions as $extraction) {
             if (!($extraction instanceof Extraction)) {
-                throw new \LogicException("Invalid collection element " . TypeDescriber::describe($extraction));
+                throw new \InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($extraction));
             }
             if (!$extraction->comparable($reference)) {
-                throw new \LogicException("Encountered incompatible generic elements");
+                throw new \InvalidArgumentException("Encountered incompatible generic elements");
             }
         }
     }

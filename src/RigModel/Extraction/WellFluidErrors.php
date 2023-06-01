@@ -15,7 +15,7 @@ final readonly class WellFluidErrors
     {
         foreach ($errors as $error) {
             if (!($error instanceof WellFluidError)) {
-                throw new \LogicException("Invalid collection element " . TypeDescriber::describe($error));
+                throw new \InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($error));
             }
         }
     }
