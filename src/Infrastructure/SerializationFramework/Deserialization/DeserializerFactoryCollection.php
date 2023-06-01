@@ -10,16 +10,18 @@ use RigStats\Infrastructure\SerializationFramework\Types\Type;
 final readonly class DeserializerFactoryCollection implements DeserializerFactory
 {
     /**
-     * @param DeserializerFactory[] $probes
+     * @param DeserializerFactory[] $factories
      */
-    public function __construct(private array $probes)
+    public function __construct(private array $factories)
     {
     }
 
     public function deserializable(Serialized $data, Type $type): ?Deserializer
     {
         // todo: strategize around 0, 1, N available probes
-        $supported = array_filter(array_map(fn($probe) => $probe->deserializable($data, $type), $this->probes));
+        $supported = array_values(
+            array_filter(array_map(fn($probe) => $probe->deserializable($data, $type), $this->factories))
+        );
         return $supported[0] ?? null;
     }
 }
