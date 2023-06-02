@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RigStats\Infrastructure\SerializationFramework;
 
+use InvalidArgumentException;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
@@ -17,7 +18,7 @@ final readonly class Format
     public function __construct(private string $format)
     {
         if (!class_exists($format) || !in_array(Serialized::class, class_implements($format) ?: [])) {
-            throw new \InvalidArgumentException("Invalid format value $format");
+            throw new InvalidArgumentException("Invalid format value $format");
         }
     }
 

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace RigStats\Infrastructure\SerializationFramework\Serialized;
 
 use RigStats\Infrastructure\SerializationFramework\Format;
+use stdClass;
 
 final readonly class Json implements Serialized
 {
-    public function __construct(private null|int|string|bool|float|array|\stdClass $normalized)
+    public function __construct(private null|int|string|bool|float|array|stdClass $normalized)
     {
     }
 
@@ -22,7 +23,7 @@ final readonly class Json implements Serialized
         return new Format(self::class);
     }
 
-    public function getData(): null|int|string|bool|float|array|\stdClass
+    public function getData(): null|int|string|bool|float|array|stdClass
     {
         return $this->normalized;
     }

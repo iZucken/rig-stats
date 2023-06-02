@@ -17,10 +17,9 @@ final class AllocationsFactory implements SerializerFactory
         if ($data instanceof Allocations) {
             if ($format->equals(Json::getFormat())) {
                 return new AllocationsJson($data);
-            } elseif ($format->equals(PhpSpreadsheet::getFormat())) {
+            }
+            if ($format->equals(PhpSpreadsheet::getFormat())) {
                 return new AllocationsSpreadsheet($data);
-            } else {
-                return null;
             }
         }
         return null;

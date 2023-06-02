@@ -7,6 +7,7 @@ namespace RigStats\Infrastructure\SerializationFramework\IO;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\Read\SerializedReader;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
+use RuntimeException;
 
 /**
  * @template-extends SerializedReader<PhpSpreadsheet>
@@ -22,6 +23,6 @@ final readonly class XlsxFileToSpreadsheetReader implements SerializedReader
         if (is_file($this->filename) && is_readable($this->filename)) {
             return new PhpSpreadsheet(IOFactory::load($this->filename));
         }
-        throw new \RuntimeException("Failed to read $this->filename");
+        throw new RuntimeException("Failed to read $this->filename");
     }
 }

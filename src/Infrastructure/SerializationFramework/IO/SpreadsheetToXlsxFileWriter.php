@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace RigStats\Infrastructure\SerializationFramework\IO;
 
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriter;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
+use RuntimeException;
 
 final readonly class SpreadsheetToXlsxFileWriter implements SerializedWriter
 {
@@ -21,6 +23,10 @@ final readonly class SpreadsheetToXlsxFileWriter implements SerializedWriter
 
     public function write(): void
     {
-        (new Xlsx($this->spreadsheet->getData()))->save("$this->basename.xlsx");
+        try {
+            (new Xlsx($this->spreadsheet->getData()))->save("$this->basename.xlsx");
+        } catch (Exception $e) {
+            throw new RuntimeException("Failed to write prepared file", $e->getCode(), $e);
+        }
     }
 }
