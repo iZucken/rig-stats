@@ -7,6 +7,7 @@ namespace RigStats\StatsApp\Console;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\JsonToFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\PlaintextToSymfonyOutputInterfaceWriterFactory;
+use RigStats\Infrastructure\SerializationFramework\IO\Read\SerializedReaderFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
@@ -14,12 +15,14 @@ use RigStats\Infrastructure\SerializationFramework\IO\XlsxFileToSpreadsheetReade
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
 use RigStats\Infrastructure\Types\TypeDescriber;
 use RigStats\RigModel\Extraction\Extractions;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand("compute:allocation", "Computes layer split allocation from extraction data files.")]
 final class ComputeAllocationCommand extends Command
 {
     private OutputInterface $output;
@@ -30,9 +33,6 @@ final class ComputeAllocationCommand extends Command
     ) {
         parent::__construct();
     }
-
-    protected static $defaultName = "compute:allocation";
-    protected static $defaultDescription = "Computes layer split allocation from extraction data files.";
 
     protected function configure(): void
     {
@@ -62,6 +62,9 @@ final class ComputeAllocationCommand extends Command
         // todo: ideally do something about this global state, maybe push it into serializer context
         ini_set('serialize_precision', 14);
         $this->output = $output;
+        /**
+         * @var SerializedReaderFactory[] $readers
+         */
         $readers = [
             new XlsxFileToSpreadsheetReaderFactory($input->getArgument("inputFilename"))
         ];
@@ -113,7 +116,7 @@ final class ComputeAllocationCommand extends Command
     private function writeAll(
         mixed $data,
         array $writers
-    ) {
+    ): void {
         foreach ($writers as $writer) {
             $atLeastOneFormat = false;
             foreach ($writer->formats() as $writerFormat) {
