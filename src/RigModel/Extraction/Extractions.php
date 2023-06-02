@@ -4,41 +4,40 @@ declare(strict_types=1);
 
 namespace RigStats\RigModel\Extraction;
 
+use InvalidArgumentException;
 use RigStats\Infrastructure\Types\TypeDescriber;
 use RigStats\RigModel\RateAllocation\Allocations;
+use SplFixedArray;
 
 final readonly class Extractions
 {
     /**
-     * @var Extraction[] $extractions
+     * @param SplFixedArray<Extraction> $extractions
      */
-    public function __construct(private array $extractions)
+    public function __construct(private SplFixedArray $extractions)
     {
-        if (empty($extractions)) {
-            return;
-        }
-        $reference = $extractions[0];
+        $reference = $extractions[0] ?? null;
         foreach ($extractions as $extraction) {
             if (!($extraction instanceof Extraction)) {
-                throw new \InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($extraction));
+                throw new InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($extraction));
             }
-            if (!$extraction->comparable($reference)) {
-                throw new \InvalidArgumentException("Encountered incompatible generic elements");
+            if (!$extraction->sameDimensions($reference)) {
+                throw new InvalidArgumentException("Encountered incompatible generic elements");
             }
         }
     }
 
-    /**
-     * @throws WellFluidErrors
-     */
     public function intoAllocationDaysOrInvalidRates(): WellFluidErrors|Allocations
     {
-        $errors = array_values(array_merge(...array_map(fn($record) => $record->getInvalidRates(), $this->extractions)));
+        $errors = array_merge(...array_map(fn($record) => $record->getWellFluidErrors(), $this->extractions->toArray()));
         if (count($errors)) {
-            return new WellFluidErrors($errors);
+            return new WellFluidErrors(SplFixedArray::fromArray($errors, false));
         }
         return new Allocations(
-            array_values(array_merge(...array_map(fn($record) => $record->toAllocationDays(), $this->extractions)))
+            SplFixedArray::fromArray(
+                array_merge(...array_map(fn($record) => $record->getAllocations(), $this->extractions->toArray())),
+                false,
+            )
         );
     }
 }

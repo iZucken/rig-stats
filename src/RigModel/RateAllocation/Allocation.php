@@ -4,30 +4,27 @@ declare(strict_types=1);
 
 namespace RigStats\RigModel\RateAllocation;
 
-use RigStats\RigModel\Fluids\FluidSplitRate;
+use DateTimeInterface;
+use RigStats\RigModel\Fluids\PerFluidMap;
+use RigStats\RigModel\Fluids\Rate;
 use RigStats\RigModel\Rig\LayerId;
 
 final readonly class Allocation
 {
+    /**
+     * @param DateTimeInterface $at
+     * @param LayerId $layer
+     * @param PerFluidMap<Rate> $rates
+     */
     public function __construct(
-        public \DateTimeInterface $at,
+        public DateTimeInterface $at,
         public LayerId $layer,
-        /**
-         * @var FluidSplitRate[]
-         */
-        public array $rates,
+        public PerFluidMap $rates,
     ) {
-        $types = array_reduce($rates, fn ($a, $r) => [$r->type->name => $r->type->name, ...$a], []);
-        if (count($rates) - count($types) !== 0) {
-            throw new \InvalidArgumentException("Unexpected duplicate rate readings.");
-        }
     }
 
-    public function comparable(Allocation $reference): bool
+    public function sameDimensions(Allocation $ref): bool
     {
-        return empty(array_diff(
-            array_map(fn ($rate) => $rate->type->name, $this->rates),
-            array_map(fn ($rate) => $rate->type->name, $reference->rates),
-        ));
+        return $this->rates->sameDimensions($ref->rates);
     }
 }

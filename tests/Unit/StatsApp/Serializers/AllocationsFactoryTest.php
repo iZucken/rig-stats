@@ -19,7 +19,7 @@ class AllocationsFactoryTest extends TestCase
     public function testSerializable()
     {
         $probe = new AllocationsFactory();
-        $maybeValidData = new Allocations([]);
+        $maybeValidData = new Allocations(new \SplFixedArray());
         $this->assertNull($probe->serializable(null, Json::getFormat()));
         $this->assertNull($probe->serializable($maybeValidData, Plaintext::getFormat()));
         $this->assertInstanceOf(

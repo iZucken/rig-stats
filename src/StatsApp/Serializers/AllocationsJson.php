@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace RigStats\StatsApp\Serializers;
 
-use RigStats\RigModel\Fluids\FluidSplitRate;
 use RigStats\RigModel\RateAllocation\Allocation;
 use RigStats\RigModel\RateAllocation\Allocations;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
@@ -20,22 +19,18 @@ final readonly class AllocationsJson implements Serializer
     {
         return new Json([
             'allocations' => [
-                'data' => array_map(fn(Allocation $row) =>
-                array_merge(
-                    [
+                'data' => array_map(function (Allocation $row) {
+                    $rates = [];
+                    foreach ($row->rates as $fluid => $rate) {
+                        $rates["{$fluid->value}Rate"] = $rate->value;
+                    }
+                    return [
                         'wellId' => $row->layer->well->id,
                         'dt' => $row->at->format('Y-m-d\TH:i:s'),
                         'layerId' => $row->layer->id,
-                    ],
-                    array_reduce(
-                        $row->rates,
-                        fn(array $rates, FluidSplitRate $rate) => [
-                            ...$rates,
-                            "{$rate->split->type->value}Rate" => $rate->getSplitRateValue()->value,
-                        ],
-                        []
-                    )
-                ), $this->data->allocations)
+                        ...$rates,
+                    ];
+                }, $this->data->allocations->toArray())
             ]
         ]);
     }

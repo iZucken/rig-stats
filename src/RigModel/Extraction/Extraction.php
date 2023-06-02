@@ -4,54 +4,40 @@ declare(strict_types=1);
 
 namespace RigStats\RigModel\Extraction;
 
-use RigStats\RigModel\Fluids\FluidRate;
-use RigStats\RigModel\Fluids\FluidSplitRate;
-use RigStats\RigModel\Fluids\FluidType;
+use DateTimeInterface;
+use RigStats\RigModel\Fluids\PerFluidMap;
+use RigStats\RigModel\Fluids\Rate;
 use RigStats\RigModel\RateAllocation\Allocation;
 
 final readonly class Extraction
 {
+    /**
+     * @codeCoverageIgnore
+     * @param DateTimeInterface $at
+     * @param PerFluidMap<ExtractionStats> $fluidStats
+     * @param float $epsilon
+     */
     public function __construct(
-        public \DateTimeInterface $at,
-        /**
-         * @var FluidRate[]
-         */
-        public array $rates,
-        /**
-         * @var ExtractionLayer[]
-         */
-        public array $layers,
+        public DateTimeInterface $at,
+        public PerFluidMap $fluidStats,
         public float $epsilon,
     ) {
-        $types = array_reduce($rates, fn ($a, $r) => [$r->type->name => $r->type->name, ...$a], []);
-        if (count($rates) - count($types) !== 0) {
-            throw new \InvalidArgumentException("Unexpected duplicate rate readings.");
-        }
     }
 
     /**
      * @return WellFluidError[]
      */
-    public function getInvalidRates(): array
+    public function getWellFluidErrors(): array
     {
-        $sums = array_reduce(
-            $this->rates,
-            fn(array $sums, FluidRate $rate) => [$rate->type->value => 0.0, ...$sums],
-            [],
-        );
-        foreach ($this->layers as $layerData) {
-            foreach ($layerData->splits as $split) {
-                $sums[$split->type->value] += $split->value;
-            }
-        }
         $errors = [];
-        foreach ($sums as $fluid => $sum) {
+        foreach ($this->fluidStats as $fluid => $stat) {
+            $sum = array_sum(array_map(fn($el) => $el->split->value, $stat->layers->toArray()));
             $error = $sum - 100;
             if (abs($error) > $this->epsilon) {
                 $errors[] = new WellFluidError(
                     $this->at,
-                    $this->layers[0]->layer->well,
-                    FluidType::from($fluid),
+                    $stat->layers[0]->layer->well,
+                    $fluid,
                     sprintf("Split data sum error by %.2f%%", $error),
                 );
             }
@@ -62,27 +48,29 @@ final readonly class Extraction
     /**
      * @return Allocation[]
      */
-    public function toAllocationDays(): array
+    public function getAllocations(): array
     {
-        $days = [];
-        foreach ($this->layers as $layer) {
-            $relativeRates = [];
-            foreach ($layer->splits as $split) {
-                $relatedRate = array_values(
-                    array_filter($this->rates, fn($rate) => $rate->type === $split->type)
-                )[0];
-                $relativeRates[] = new FluidSplitRate($split, $relatedRate);
+        $layers = [];
+        foreach ($this->fluidStats as $fluid => $stat) {
+            foreach ($stat->layers as $split) {
+                $layers[$split->layer->id] = $layers[$split->layer->id] ?? new Allocation(
+                    $this->at,
+                    $split->layer,
+                    new PerFluidMap(Rate::class),
+                );
+                $layers[$split->layer->id]->rates->add(
+                    $fluid,
+                    new Rate($stat->rate->value * $split->split->value / 100.0)
+                );
             }
-            $days[] = new Allocation($this->at, $layer->layer, $relativeRates);
         }
-        return $days;
+        return array_values($layers);
     }
 
-    public function comparable(Extraction $reference): bool
+    public function sameDimensions(Extraction $reference): bool
     {
-        return empty(array_diff(
-            array_map(fn ($rate) => $rate->type->name, $this->rates),
-            array_map(fn ($rate) => $rate->type->name, $reference->rates),
-        ));
+        return $this->fluidStats->sameDimensions($reference->fluidStats)
+                // todo: maybe epsilon comparison should also have an epsilon ;)
+            && $this->epsilon === $reference->epsilon;
     }
 }

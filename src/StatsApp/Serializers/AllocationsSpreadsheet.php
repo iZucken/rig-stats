@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace RigStats\StatsApp\Serializers;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use RigStats\RigModel\Fluids\FluidSplitRate;
+use RigStats\RigModel\Fluids\FluidType;
+use RigStats\RigModel\Fluids\Rate;
 use RigStats\RigModel\RateAllocation\Allocations;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
@@ -23,37 +24,22 @@ final readonly class AllocationsSpreadsheet implements Serializer
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('allocations');
         $reference = $this->data->allocations[0];
-        $keys = array_merge(
-            [
-                'dt',
-                'well_id',
-                'layer_id',
-            ],
-            array_reduce(
-                $reference->rates,
-                fn(array $rates, FluidSplitRate $rate) => [
-                    ...$rates,
-                    "{$rate->split->type->value}_rate",
-                ],
-                []
-            ),
-        );
+        $keys = [
+            'dt',
+            'well_id',
+            'layer_id',
+            ...array_map(fn (FluidType $type) => "{$type->value}_rate", $reference->rates->keys()),
+        ];
         foreach ($keys as $index => $key) {
             $sheet->setCellValue([$index + 1, 1], $key);
         }
         foreach ($this->data->allocations as $rowIndex => $row) {
-            $serialRow = array_merge(
-                [
-                    $row->at->format("Y-m-d H:i:s"),
-                    $row->layer->well->id,
-                    $row->layer->id,
-                ],
-                array_reduce(
-                    $row->rates,
-                    fn(array $rates, FluidSplitRate $rate) => [...$rates, $rate->getSplitRateValue()->value],
-                    []
-                ),
-            );
+            $serialRow = [
+                $row->at->format("Y-m-d H:i:s"),
+                $row->layer->well->id,
+                $row->layer->id,
+                ...array_map(fn (Rate $v) => $v->value, $row->rates->values()),
+            ];
             foreach ($serialRow as $colIndex => $col) {
                 $sheet->setCellValue([$colIndex + 1, $rowIndex + 2], $col);
             }

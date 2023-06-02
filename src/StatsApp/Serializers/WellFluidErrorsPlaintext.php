@@ -22,7 +22,7 @@ final readonly class WellFluidErrorsPlaintext implements Serializer
                 array_map(
                     fn($error) => "At {$error->at->format('Y-m-d')} "
                         . "#{$error->well->id} for {$error->fluid->value}: $error->error",
-                    $this->error->errors
+                    $this->error->errors->toArray()
                 )
             )
         );
