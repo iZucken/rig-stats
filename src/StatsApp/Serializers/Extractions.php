@@ -55,7 +55,7 @@ final readonly class Extractions implements Deserializer
                 );
             }
             $data[] = new Extraction(
-                DateTimeImmutable::createFromFormat("Y-m-d", $row[0]),
+                DateTimeImmutable::createFromFormat("!Y-m-d", $row[0]),
                 $statsMap,
                 $this->epsilon,
             );
