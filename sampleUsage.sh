@@ -13,5 +13,5 @@ echo "Running with valid data source:"
 echo ""
 
 echo "Run tests with coverage:"
-XDEBUG_MODE=coverage vendor/bin/phpunit tests --coverage-text
+XDEBUG_MODE=coverage vendor/bin/phpunit tests --coverage-text --path-coverage
 echo ""
