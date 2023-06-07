@@ -5,6 +5,7 @@ Command to compute rig layer split rates from rig stat input files. Not optimise
 ### Setup
 
 Setup when using docker compose assuming current working directory in package root:
+
 1. `cp .env.example .env` and change according to your needs
 2. Run `docker-compose run composer install`
 3. Run samples with `./example.sh` to verify your setup works
@@ -27,9 +28,11 @@ Supported computations are baked into the command.
 
 #### "Extraction rates\splits series"
 
-For allocation compute source files, layer split data represents rate percentage per layer and must add up to 100% with at least 1e-5 accuracy.
+For allocation compute source files, layer split data represents rate percentage per layer and must add up to 100% with
+at least 1e-5 accuracy.
 
 Considered inconsequential or up to the user (a lot but the again this is just a test):
+
 - time slice sequencing
 - whether time slice refers to a day
 - well layers stability between days
@@ -42,9 +45,15 @@ For allocation computation layer rates are computed using `layer_rate = well_rat
 
 Sample xlsx output:
 
-![computationXlsxExample.png](docs/computationXlsxExample.png)
+| dt                  | well_id | layer_id | oil_rate         | gas_rate        | water_rate      |
+|---------------------|---------|----------|------------------|-----------------|-----------------|
+| 2022-12-01 00:00:00 | 0       | 4        | 15.295271785934  | 80.932299594197 | 47.767335473972 |
+| 2022-12-01 00:00:00 | 1       | 0        | 0.94284054455412 | 50.215626301672 | 31.577161553345 |
+| 2022-12-01 00:00:00 | 1       | 1        | 1.6315786095135  | 8.3386609029143 | 10.661237418533 |
+| 2022-12-01 00:00:00 | 1       | 3        | 0.79066889201148 | 4.5989026702649 | 24.787653168743 |
 
 Sample json output:
+
 ```json
 {
   "allocation": {
@@ -67,6 +76,7 @@ Sample json output:
 Output if extraction layer split data does not add up to 100% with required accuracy.
 
 Sample for console:
+
 ```text
 Writing plain text (892 bytes) to generic output
 At 2022-12-01 #92 for oil: Split data sum error by -41.61%
