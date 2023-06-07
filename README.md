@@ -7,7 +7,7 @@ Command to compute rig layer split rates from rig stat input files. Not optimise
 Setup when using docker compose assuming current working directory in package root:
 1. `cp .env.example .env` and change according to your needs
 2. Run `docker-compose run composer install`
-3. Run samples with `docker-compose run php ./sampleUsage.sh` to verify your setup works
+3. Run samples with `./example.sh` to verify your setup works
 
 ### Input\Output
 
