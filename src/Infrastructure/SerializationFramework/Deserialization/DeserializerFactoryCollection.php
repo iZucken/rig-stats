@@ -6,6 +6,9 @@ namespace RigStats\Infrastructure\SerializationFramework\Deserialization;
 
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
+/**
+ * @template-implements DeserializerFactory<mixed, mixed>
+ */
 final readonly class DeserializerFactoryCollection implements DeserializerFactory
 {
     /**

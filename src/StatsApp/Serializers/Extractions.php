@@ -17,10 +17,11 @@ use RigStats\RigModel\Rig\LayerId;
 use RigStats\RigModel\Rig\WellId;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\Deserializer;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
+use RuntimeException;
 use SplFixedArray;
 
 /**
- * @template-extends Deserializer<PhpSpreadsheet, ExtractionsModel>
+ * @template-implements Deserializer<PhpSpreadsheet, ExtractionsModel>
  */
 final readonly class Extractions implements Deserializer
 {
@@ -30,8 +31,14 @@ final readonly class Extractions implements Deserializer
 
     public function deserialize(): ExtractionsModel
     {
-        $rates = $this->carrier->getData()->getSheetByName("rates")->toArray();
-        $splits = $this->carrier->getData()->getSheetByName("splits")->toArray();
+        /**
+         * @var array<int, array<int, string>> $rates
+         */
+        $rates = $this->carrier->getData()->getSheetByName("rates")?->toArray() ?? [];
+        /**
+         * @var array<int, array<int, string>> $splits
+         */
+        $splits = $this->carrier->getData()->getSheetByName("splits")?->toArray() ?? [];
         array_shift($rates); // header removal
         array_shift($splits); // header removal
         $layers = [];
@@ -54,8 +61,11 @@ final readonly class Extractions implements Deserializer
                     )
                 );
             }
+            if (!$dt = DateTimeImmutable::createFromFormat("!Y-m-d", $row[0])) {
+                throw new RuntimeException("Value $row[0] must be a valid date conforming to `!Y-m-d`");
+            }
             $data[] = new Extraction(
-                DateTimeImmutable::createFromFormat("!Y-m-d", $row[0]),
+                $dt,
                 $statsMap,
                 $this->epsilon,
             );

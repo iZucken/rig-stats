@@ -12,11 +12,15 @@ use SplFixedArray;
 final readonly class Extractions
 {
     /**
+     * @psalm-suppress RedundantConditionGivenDocblockType
      * @param SplFixedArray<Extraction> $extractions
      */
     public function __construct(private SplFixedArray $extractions)
     {
-        $reference = $extractions[0] ?? null;
+        if (count($extractions) === 0) {
+            return;
+        }
+        $reference = $extractions[0];
         foreach ($extractions as $extraction) {
             if (!($extraction instanceof Extraction)) {
                 throw new InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($extraction));

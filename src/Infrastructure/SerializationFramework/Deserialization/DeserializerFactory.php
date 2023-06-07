@@ -14,7 +14,7 @@ interface DeserializerFactory
 {
     /**
      * @param Serialized<Carrier> $data
-     * @return null|Deserializer<Target>
+     * @return null|Deserializer<Carrier, Target>
      */
     public function deserializable(Serialized $data): ?Deserializer;
 }

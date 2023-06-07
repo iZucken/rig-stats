@@ -25,8 +25,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand("compute:allocation", "Computes layer split allocation from extraction data files.")]
 final class ComputeAllocationCommand extends Command
 {
-    private OutputInterface $output;
-
     public function __construct(
         private readonly SerializerFactory $serializers,
         private readonly DeserializerFactory $deserializers,
@@ -61,7 +59,6 @@ final class ComputeAllocationCommand extends Command
     {
         // todo: ideally do something about this global state, maybe push it into serializer context
         ini_set('serialize_precision', 14);
-        $this->output = $output;
         /**
          * @var SerializedReaderFactory[] $readers
          */
@@ -77,63 +74,52 @@ final class ComputeAllocationCommand extends Command
         ];
         $chosenWriters = $input->getOption("writer");
         if (count($extras = array_diff($chosenWriters, array_keys($writers)))) {
-            $this->output->writeln(
+            $output->writeln(
                 "There is no `--writer` for " . join(", ", $extras)
                 . "; supported `--writer` options are: " . join(", ", array_keys($writers)) . "."
             );
             return Command::INVALID;
         }
+        /** @var array<string, SerializedWriterFactory> $writers */
         $writers = array_intersect_key($writers, array_combine($chosenWriters, $chosenWriters));
         foreach ($readers as $readerFactory) {
             if ($serialized = $readerFactory->readable()?->read()) {
                 if ($loadedModel = $this->deserializers->deserializable($serialized)?->deserialize()) {
                     if ($loadedModel instanceof Extractions) {
                         $computed = $loadedModel->intoAllocationDaysOrInvalidRates();
-                        $this->output->writeln("Computation complete into " . TypeDescriber::describe($computed));
-                        $this->writeAll($computed, $writers);
+                        $output->writeln("Computation complete into " . TypeDescriber::describe($computed));
+                        foreach ($writers as $writer) {
+                            $atLeastOneFormat = false;
+                            foreach ($writer->formats() as $writerFormat) {
+                                if ($serializable = $this->serializers->serializable($computed, $writerFormat)) {
+                                    if ($writable = $writer->writable($serializable->serialize())) {
+                                        $output->writeln($writable->describe());
+                                        $writable->write();
+                                        $atLeastOneFormat = true;
+                                    }
+                                }
+                            }
+                            if (!$atLeastOneFormat) {
+                                $output->writeln(
+                                    "No compatible output for " . get_class($writer)
+                                    . " on " . TypeDescriber::describe($computed)
+                                );
+                            }
+                        }
                         return Command::SUCCESS;
                     }
                     // todo: test when other data type is possible
-                    $this->output->writeln(
+                    $output->writeln(
                         "This program only supports " . Extractions::class
                         . ", but got " . TypeDescriber::describe($loadedModel)
                     );
                     return Command::INVALID;
                 }
-                $this->output->writeln("{$serialized->describe()} is not deserializable into any known type.");
+                $output->writeln("{$serialized->describe()} is not deserializable into any known type.");
                 return Command::INVALID;
             }
         }
-        $this->output->writeln("Failed to read the input into any known container type.");
+        $output->writeln("Failed to read the input into any known container type.");
         return Command::INVALID;
-    }
-
-    /**
-     * @param mixed $data
-     * @param SerializedWriterFactory[] $writers
-     * @return void
-     */
-    private function writeAll(
-        mixed $data,
-        array $writers
-    ): void {
-        foreach ($writers as $writer) {
-            $atLeastOneFormat = false;
-            foreach ($writer->formats() as $writerFormat) {
-                if ($serializable = $this->serializers->serializable($data, $writerFormat)) {
-                    if ($writable = $writer->writable($serializable->serialize())) {
-                        $this->output->writeln($writable->describe());
-                        $writable->write();
-                        $atLeastOneFormat = true;
-                    }
-                }
-            }
-            if (!$atLeastOneFormat) {
-                $this->output->writeln(
-                    "No compatible output for " . get_class($writer)
-                    . " on " . TypeDescriber::describe($data)
-                );
-            }
-        }
     }
 }

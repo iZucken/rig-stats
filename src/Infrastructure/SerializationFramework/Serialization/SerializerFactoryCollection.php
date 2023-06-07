@@ -6,6 +6,9 @@ namespace RigStats\Infrastructure\SerializationFramework\Serialization;
 
 use RigStats\Infrastructure\SerializationFramework\Format;
 
+/**
+ * @template-implements SerializerFactory<mixed, mixed, mixed>
+ */
 final readonly class SerializerFactoryCollection implements SerializerFactory
 {
     /**
@@ -18,9 +21,8 @@ final readonly class SerializerFactoryCollection implements SerializerFactory
     public function serializable(mixed $data, Format $format): ?Serializer
     {
         // todo: strategize around 0, 1, N available probes
-        $supported = array_values(
-            array_filter(array_map(fn($probe) => $probe->serializable($data, $format), $this->factories))
-        );
+        $mapBy = fn(SerializerFactory $factory): ?Serializer => $factory->serializable($data, $format);
+        $supported = array_values(array_filter(array_map($mapBy, $this->factories)));
         return $supported[0] ?? null;
     }
 }

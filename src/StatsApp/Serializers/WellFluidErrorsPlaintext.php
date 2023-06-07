@@ -8,6 +8,9 @@ use RigStats\RigModel\Extraction\WellFluidErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Plaintext;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
+/**
+ * @template-implements Serializer<WellFluidErrors, Plaintext>
+ */
 final readonly class WellFluidErrorsPlaintext implements Serializer
 {
     public function __construct(private WellFluidErrors $error)

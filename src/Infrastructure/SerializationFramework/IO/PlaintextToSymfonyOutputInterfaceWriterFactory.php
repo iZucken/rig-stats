@@ -11,7 +11,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @template-extends SerializedWriterFactory<Plaintext>
+ * @template-implements SerializedWriterFactory<Plaintext>
  */
 final readonly class PlaintextToSymfonyOutputInterfaceWriterFactory implements SerializedWriterFactory
 {

@@ -9,6 +9,9 @@ use RigStats\RigModel\Extraction\WellFluidErrors;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
+/**
+ * @template-implements Serializer<WellFluidErrors, PhpSpreadsheet>
+ */
 final readonly class WellFluidErrorsSpreadsheet implements Serializer
 {
     public function __construct(private WellFluidErrors $error)

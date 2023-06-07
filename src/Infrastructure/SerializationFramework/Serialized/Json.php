@@ -7,6 +7,9 @@ namespace RigStats\Infrastructure\SerializationFramework\Serialized;
 use RigStats\Infrastructure\SerializationFramework\Format;
 use stdClass;
 
+/**
+ * @template-implements Serialized<null|int|string|bool|float|array|stdClass>
+ */
 final readonly class Json implements Serialized
 {
     public function __construct(private null|int|string|bool|float|array|stdClass $normalized)

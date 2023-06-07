@@ -10,7 +10,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RuntimeException;
 
 /**
- * @template-extends SerializedReader<PhpSpreadsheet>
+ * @template-implements SerializedReader<PhpSpreadsheet>
  */
 final readonly class XlsxFileToSpreadsheetReader implements SerializedReader
 {

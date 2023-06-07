@@ -13,7 +13,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 final readonly class Format
 {
     /**
-     * @param class-string<T|Serialized> $format
+     * @param class-string<T & Serialized> $format
      */
     public function __construct(private string $format)
     {

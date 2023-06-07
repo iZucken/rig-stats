@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace RigStats\StatsApp\Serializers;
 
+use RigStats\Infrastructure\SerializationFramework\Deserialization\Deserializer;
 use RigStats\RigModel\Extraction\Extractions as ExtractionsModel;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
- * @template-extends DeserializerFactory<PhpSpreadsheet, ExtractionsModel>
+ * @template-implements DeserializerFactory<PhpSpreadsheet, ExtractionsModel>
  */
 final readonly class ExtractionsFactory implements DeserializerFactory
 {
@@ -18,7 +19,7 @@ final readonly class ExtractionsFactory implements DeserializerFactory
     {
     }
 
-    public function deserializable(Serialized $data): ?Extractions
+    public function deserializable(Serialized $data): ?Deserializer
     {
         if ($data instanceof PhpSpreadsheet
             && $data->getData()->getSheetByName("rates")

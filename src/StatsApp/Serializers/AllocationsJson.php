@@ -9,6 +9,9 @@ use RigStats\RigModel\RateAllocation\Allocations;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialization\Serializer;
 
+/**
+ * @template-implements Serializer<Allocations, Json>
+ */
 final readonly class AllocationsJson implements Serializer
 {
     public function __construct(private Allocations $data)

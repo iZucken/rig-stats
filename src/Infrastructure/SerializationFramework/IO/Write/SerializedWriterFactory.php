@@ -8,17 +8,17 @@ use RigStats\Infrastructure\SerializationFramework\Format;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
- * @template Format
+ * @template Formats
  */
 interface SerializedWriterFactory
 {
     /**
-     * @return Format<Format>[]
+     * @return Format<Formats>[]
      */
     public function formats(): array;
 
     /**
-     * @param Serialized<Format> $data
+     * @param Serialized<Format<Formats>> $data
      * @return SerializedWriter|null
      */
     public function writable(Serialized $data): ?SerializedWriter;

@@ -11,11 +11,15 @@ use SplFixedArray;
 final readonly class Allocations
 {
     /**
+     * @psalm-suppress RedundantConditionGivenDocblockType
      * @param SplFixedArray<Allocation> $allocations
      */
     public function __construct(public SplFixedArray $allocations)
     {
-        $reference = $allocations[0] ?? null;
+        if (count($allocations) === 0) {
+            return;
+        }
+        $reference = $allocations[0];
         foreach ($allocations as $allocation) {
             if (!($allocation instanceof Allocation)) {
                 throw new InvalidArgumentException("Invalid collection element " . TypeDescriber::describe($allocation));

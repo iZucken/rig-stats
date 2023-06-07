@@ -17,11 +17,14 @@ final readonly class ExtractionStats
      */
     public function __construct(public Rate $rate, public SplFixedArray $layers)
     {
-        $sample = $layers[0] ?? null;
+        if (count($layers) === 0) {
+            return;
+        }
+        $sample = $layers[0];
         foreach ($layers as $layer) {
             if (!$layer->layer->well->equals($sample->layer->well)) {
                 throw new InvalidArgumentException(
-                    "Incompatible well IDs {$layer->layer->well} </> {$sample->layer->well}"
+                    "Incompatible well IDs {$layer->layer->well->id} </> {$sample->layer->well->id}"
                 );
             }
         }

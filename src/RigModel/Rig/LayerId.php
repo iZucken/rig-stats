@@ -15,6 +15,9 @@ final readonly class LayerId
         }
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function equals(self $other): bool
     {
         return $this->id === $other->id && $this->well->equals($other->well);

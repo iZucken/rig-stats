@@ -7,6 +7,9 @@ namespace RigStats\Infrastructure\SerializationFramework\Serialized;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Format;
 
+/**
+ * @template-implements Serialized<Spreadsheet>
+ */
 final readonly class PhpSpreadsheet implements Serialized
 {
     public function __construct(private Spreadsheet $spreadsheet)

@@ -10,7 +10,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 
 /**
- * @template-extends SerializedWriterFactory<PhpSpreadsheet>
+ * @template-implements SerializedWriterFactory<PhpSpreadsheet>
  */
 final readonly class SpreadsheetToXlsxFileWriterFactory implements SerializedWriterFactory
 {

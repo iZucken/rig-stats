@@ -26,6 +26,7 @@ final class PerFluidMap implements Iterator
     }
 
     /**
+     * @psalm-suppress DocblockTypeContradiction
      * @param T $value
      */
     public function add(FluidType $type, $value): void
@@ -42,6 +43,7 @@ final class PerFluidMap implements Iterator
     }
 
     /**
+     * @psalm-suppress PossiblyUnusedMethod
      * @return T
      */
     public function get(FluidType $type): mixed

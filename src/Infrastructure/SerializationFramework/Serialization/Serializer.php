@@ -7,12 +7,14 @@ namespace RigStats\Infrastructure\SerializationFramework\Serialization;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
+ * @psalm-api
  * @template Target
+ * @template Carrier
  */
 interface Serializer
 {
     /**
-     * @return Serialized<Target>
+     * @return Serialized<Carrier>
      */
     public function serialize(): Serialized;
 }

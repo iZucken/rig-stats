@@ -10,7 +10,7 @@ use RigStats\Infrastructure\SerializationFramework\Serialized\Json;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
 /**
- * @template-extends SerializedWriterFactory<Json>
+ * @template-implements SerializedWriterFactory<Json>
  */
 final readonly class JsonToFileWriterFactory implements SerializedWriterFactory
 {

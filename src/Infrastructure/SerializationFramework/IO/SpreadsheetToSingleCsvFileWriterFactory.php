@@ -9,6 +9,9 @@ use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFact
 use RigStats\Infrastructure\SerializationFramework\Serialized\PhpSpreadsheet;
 use RigStats\Infrastructure\SerializationFramework\Serialized\Serialized;
 
+/**
+ * @template-implements SerializedWriterFactory<PhpSpreadsheet>
+ */
 final readonly class SpreadsheetToSingleCsvFileWriterFactory implements SerializedWriterFactory
 {
     public function __construct(private string $basename)

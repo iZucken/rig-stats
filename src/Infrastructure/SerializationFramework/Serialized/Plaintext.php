@@ -6,6 +6,9 @@ namespace RigStats\Infrastructure\SerializationFramework\Serialized;
 
 use RigStats\Infrastructure\SerializationFramework\Format;
 
+/**
+ * @template-implements Serialized<string>
+ */
 final readonly class Plaintext implements Serialized
 {
     public function __construct(private string $text)
