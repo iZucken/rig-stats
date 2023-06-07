@@ -13,7 +13,7 @@ echo "Running with valid data source:"
 echo ""
 
 echo "Run strict psalm:"
-vendor/bin/psalm --threads=4
+vendor/bin/psalm
 echo ""
 
 echo "Run tests with coverage:"
