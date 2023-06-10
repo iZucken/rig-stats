@@ -2,8 +2,6 @@
 <?php
 declare(strict_types=1);
 
-use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactoryCollection;
-use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactoryCollection;
 use RigStats\StatsApp\Console\ComputeAllocationCommand;
 use RigStats\StatsApp\Serializers\AllocationsFactory;
 use RigStats\StatsApp\Serializers\ExtractionsFactory;
@@ -16,13 +14,13 @@ $app = new Application();
 $app->add(
     new ComputeAllocationCommand(
     // note: in a bigger app these dependencies could be autowired by DI container
-        new SerializerFactoryCollection([
+        [
             new AllocationsFactory(),
             new WellFluidErrorsFactory(),
-        ]),
-        new DeserializerFactoryCollection([
+        ],
+        [
             new ExtractionsFactory(1e-5),
-        ]),
+        ],
     )
 );
 $app->run();

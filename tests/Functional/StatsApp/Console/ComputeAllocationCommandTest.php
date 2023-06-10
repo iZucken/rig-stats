@@ -4,8 +4,6 @@ namespace Functional\StatsApp\Console;
 
 use PhpOffice\PhpSpreadsheet\Settings;
 use PHPUnit\Framework\TestCase;
-use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactoryCollection;
-use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactoryCollection;
 use RigStats\RigModel\Extraction\WellFluidErrors;
 use RigStats\RigModel\RateAllocation\Allocations;
 use RigStats\StatsApp\Console\ComputeAllocationCommand;
@@ -25,13 +23,13 @@ class ComputeAllocationCommandTest extends TestCase
     {
         $this->sut = new CommandTester(
             new ComputeAllocationCommand(
-                new SerializerFactoryCollection([
+                [
                     new AllocationsFactory(),
                     new WellFluidErrorsFactory(),
-                ]),
-                new DeserializerFactoryCollection([
+                ],
+                [
                     new ExtractionsFactory(1e-5),
-                ]),
+                ],
             )
         );
     }
@@ -67,7 +65,6 @@ class ComputeAllocationCommandTest extends TestCase
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
         $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
-        $this->assertStringContainsString(WellFluidErrors::class, $this->sut->getDisplay());
     }
 
     public function testItFailsOnInvalidWriterOptions()
@@ -89,9 +86,7 @@ class ComputeAllocationCommandTest extends TestCase
             'inputFilename' => __DIR__ . '/../../../examples/rates_splits/valid_lite.xlsx',
             '--writer' => ['stdio'],
         ]);
-        $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
-        $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
-        $this->assertStringContainsString(Allocations::class, $this->sut->getDisplay());
+        $this->assertEquals(2, $this->sut->getStatusCode(), $this->sut->getDisplay());
         $this->assertStringContainsString("No compatible output for", $this->sut->getDisplay());
     }
 
@@ -102,7 +97,6 @@ class ComputeAllocationCommandTest extends TestCase
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
         $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
-        $this->assertStringContainsString(Allocations::class, $this->sut->getDisplay());
     }
 
     public function testItRunsOnValidDataWithCustomPath()
@@ -115,7 +109,6 @@ class ComputeAllocationCommandTest extends TestCase
         ]);
         $this->assertEquals(0, $this->sut->getStatusCode(), $this->sut->getDisplay());
         $this->assertStringContainsString("Computation complete", $this->sut->getDisplay());
-        $this->assertStringContainsString(Allocations::class, $this->sut->getDisplay());
         $this->assertFileExists($tmpName . '.xlsx');
         unlink($tmpName . '.xlsx');
     }

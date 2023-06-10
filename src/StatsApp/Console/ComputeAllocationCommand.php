@@ -7,14 +7,12 @@ namespace RigStats\StatsApp\Console;
 use RigStats\Infrastructure\SerializationFramework\Deserialization\DeserializerFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\JsonToFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\PlaintextToSymfonyOutputInterfaceWriterFactory;
-use RigStats\Infrastructure\SerializationFramework\IO\Read\SerializedReaderFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToSingleCsvFileWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\SpreadsheetToXlsxFileWriterFactory;
-use RigStats\Infrastructure\SerializationFramework\IO\Write\SerializedWriterFactory;
 use RigStats\Infrastructure\SerializationFramework\IO\XlsxFileToSpreadsheetReaderFactory;
 use RigStats\Infrastructure\SerializationFramework\Serialization\SerializerFactory;
-use RigStats\Infrastructure\Types\TypeDescriber;
-use RigStats\RigModel\Extraction\Extractions;
+use RigStats\DataPipe\FirstFitPipe;
+use RigStats\DataPipe\Exceptions\PipeNotConvergedException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -26,8 +24,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class ComputeAllocationCommand extends Command
 {
     public function __construct(
-        private readonly SerializerFactory $serializers,
-        private readonly DeserializerFactory $deserializers,
+        /**
+         * @var SerializerFactory[]
+         */
+        private readonly array $serializers,
+        /**
+         * @var DeserializerFactory[]
+         */
+        private readonly array $deserializers,
     ) {
         parent::__construct();
     }
@@ -59,12 +63,6 @@ final class ComputeAllocationCommand extends Command
     {
         // todo: ideally do something about this global state, maybe push it into serializer context
         ini_set('serialize_precision', 14);
-        /**
-         * @var SerializedReaderFactory[] $readers
-         */
-        $readers = [
-            new XlsxFileToSpreadsheetReaderFactory($input->getArgument("inputFilename"))
-        ];
         $outputBasename = $input->getArgument("outputBasename");
         $writers = [
             'stdio' => new PlaintextToSymfonyOutputInterfaceWriterFactory($output),
@@ -80,46 +78,20 @@ final class ComputeAllocationCommand extends Command
             );
             return Command::INVALID;
         }
-        /** @var array<string, SerializedWriterFactory> $writers */
-        $writers = array_intersect_key($writers, array_combine($chosenWriters, $chosenWriters));
-        foreach ($readers as $readerFactory) {
-            if ($serialized = $readerFactory->readable()?->read()) {
-                if ($loadedModel = $this->deserializers->deserializable($serialized)?->deserialize()) {
-                    if ($loadedModel instanceof Extractions) {
-                        $computed = $loadedModel->intoAllocationDaysOrInvalidRates();
-                        $output->writeln("Computation complete into " . TypeDescriber::describe($computed));
-                        foreach ($writers as $writer) {
-                            $atLeastOneFormat = false;
-                            foreach ($writer->formats() as $writerFormat) {
-                                if ($serializable = $this->serializers->serializable($computed, $writerFormat)) {
-                                    if ($writable = $writer->writable($serializable->serialize())) {
-                                        $output->writeln($writable->describe());
-                                        $writable->write();
-                                        $atLeastOneFormat = true;
-                                    }
-                                }
-                            }
-                            if (!$atLeastOneFormat) {
-                                $output->writeln(
-                                    "No compatible output for " . get_class($writer)
-                                    . " on " . TypeDescriber::describe($computed)
-                                );
-                            }
-                        }
-                        return Command::SUCCESS;
-                    }
-                    // todo: test when other data type is possible
-                    $output->writeln(
-                        "This program only supports " . Extractions::class
-                        . ", but got " . TypeDescriber::describe($loadedModel)
-                    );
-                    return Command::INVALID;
-                }
-                $output->writeln("{$serialized->describe()} is not deserializable into any known type.");
-                return Command::INVALID;
-            }
+        try {
+            (new FirstFitPipe(
+                [
+                    new XlsxFileToSpreadsheetReaderFactory($input->getArgument("inputFilename"))
+                ],
+                array_intersect_key($writers, array_combine($chosenWriters, $chosenWriters)),
+                $this->serializers,
+                $this->deserializers,
+            ))->run();
+            $output->writeln("Computation complete");
+            return Command::SUCCESS;
+        } catch (PipeNotConvergedException $exception) {
+            $output->writeln($exception->getMessage());
+            return Command::INVALID;
         }
-        $output->writeln("Failed to read the input into any known container type.");
-        return Command::INVALID;
     }
 }
